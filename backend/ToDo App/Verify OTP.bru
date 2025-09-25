@@ -1,0 +1,22 @@
+meta {
+  name: Verify OTP
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:5000/users/VerifyOTP
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+     "email": "pshfcspm2303901@hadaf.edu.pk",
+    "otp": "166355"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
