@@ -14,6 +14,10 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    avatarUrl: {
+        type: String,
+        default: ""
+    },
 
     otp: String,
     otpExpiresAt: Date,

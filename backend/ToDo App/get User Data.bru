@@ -1,0 +1,19 @@
+meta {
+  name: get User Data
+  type: http
+  seq: 6
+}
+
+get {
+  url: /GetUserProfile/:userId
+  body: none
+  auth: inherit
+}
+
+params:path {
+  userId: 
+}
+
+settings {
+  encodeUrl: true
+}

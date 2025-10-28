@@ -1,12 +1,26 @@
 import express from "express";
 import { config } from "dotenv";
+import jwt from 'jsonwebtoken'
 const app = express();
 import UserModel from "../Modells/UserModle.js";
-import nodemilar from "nodemailer";
+import nodemailar from "nodemailer";
 import bcrypt from "bcrypt";
-import { version } from "mongoose";
+import  uploadToCloudinary  from "../Utils/Cloudnary.js";
+
 
 config();
+
+const JWT_SECRET_kEY = process.env.JWT_SECRET
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN
+
+
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user._id, email: user.email, name: user.name },
+    JWT_SECRET_kEY,
+    { expiresIn: JWT_EXPIRES_IN }
+  );
+};
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -37,7 +51,7 @@ const Register = async (req, res) => {
   const OTP = Math.floor(100000 + Math.random() * 900000).toString();
 
   // Send OTP via email
-  const transporter = nodemilar.createTransport({
+  const transporter = nodemailar.createTransport({
     service: "gmail",
     auth: {
       user: process.env.EMAIL_SERVICE,
@@ -58,7 +72,7 @@ const Register = async (req, res) => {
     email,
     password: hashedPassword,
     otp: OTP,
-    otpExpiresAt: Date.now() + 10 * 60 * 60 * 500, // 10 min expiry
+    otpExpiresAt: Date.now() + 1000 * 60 * 60 * 24, // 10 min expiry
   });
 
   return res
@@ -105,9 +119,13 @@ const Login = async (req, res) => {
     return res.status(400).json({ message: "Email and password are required" });
   }
   const user = await UserModel.find({ email });
+  if (user.length === 0) {
+     return res.status(401).json({ message: "Invalid email or password" });
+  }
+
   const PasswordsMatch = await bcrypt.compare(password, user[0].password);
 
-  if (user.length === 0 || !PasswordsMatch) {
+  if ( !PasswordsMatch) {
     return res.status(401).json({ message: "Invalid email or password" });
   }
   if (!user[0].verified) {
@@ -116,11 +134,70 @@ const Login = async (req, res) => {
       .json({ message: "Please verify your email before logging in" });
   }
 
-  return res.status(200).json({ message: "Login successful", user });
+   const token = generateToken(user);
+
+  return res.status(200).json({token, message: "Login successful", user });
 };
+
+
+const UpdateUserProfile = async (req, res) => {
+  const { userId } = req.params;
+  const { name, email } = req.body;
+
+  try {
+   
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+  
+    let avatarUrl = user.avatarUrl;
+    if (req.file) {
+      avatarUrl = await uploadToCloudinary(req.file.path);
+    }
+
+  
+    user.name = name || user.name;
+    user.email = email || user.email;
+    user.avatarUrl = avatarUrl;
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      user,
+    });
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+const GetUserProfile = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const user = await UserModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({ user });
+  } catch (error) {
+    console.error("Error fetching profile:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+
 
 export default {
   Register,
   Login,
   VerifyOTP,
+  UpdateUserProfile,
+  GetUserProfile
 };

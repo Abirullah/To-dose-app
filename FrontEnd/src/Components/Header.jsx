@@ -4,7 +4,7 @@ function Header() {
     return (
        <header className="bg-white bg-opacity-10 backdrop-blur-md shadow-md sticky top-0 z-10 ">
          <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-         <div className="text-2xl font-bold text-gray-800 flex items-center space-x-5">
+         <div className="text-2xl font-bold text-gray-800 flex items-center space-x-5 sm:ml-2">
           <img className='w-10 h-10'  src="https://img.freepik.com/premium-vector/todo-app-icon_1076610-59732.jpg" alt="" />
        TaskMaster
       </div>

@@ -6,6 +6,7 @@ import OTPconformationPage from './Pages/OTPconformationPage';
 import Login from './Pages/Login';
 import HomePage from './Pages/HomePage';
 import Header from './Components/Header';
+import UserDishBoard from '../src/Pages/User/DishBoard'
 
 
 function App() {
@@ -14,13 +15,16 @@ function App() {
 
 
   return (
+
+    // <PrivatePage/>
     <Router>
       <Header/>
       <Routes>
         <Route path='/' element={<HomePage/>}/>
         <Route path='/AccountRegistration' element={<Registration/>}/>
         <Route path='/AccountLogin' element={<Login/>}/>
-        <Route path='/OTPConformation' element={<OTPconformationPage/>}/>
+        <Route path='/OTPConformation' element={<OTPconformationPage />} />
+        <Route path='/dishboard' element = {<UserDishBoard/>}/>
       </Routes>
     </Router>
   )

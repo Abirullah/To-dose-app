@@ -11,6 +11,7 @@ export default function Login() {
     password: "",
   });
   const [loading, setLoading] = useState(false);
+  const [loginUser , setloginUser] = useState(null);
    
   const navigate = useNavigate();
   const handleChange = (e) => {
@@ -21,10 +22,17 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-     await axios.post("http://localhost:5000/users/Login", formData);
+     const response= await axios.post("http://localhost:5000/users/Login", formData);
       toast.success("Login successful!");
+      setloginUser(true);
       setLoading(false);
-      // Redirect or further logic here
+      
+      navigate("/dishboard")
+      
+      const { token } = response.data
+      
+      localStorage.setItem("authToken", token);
+
     } catch (error) {
       if (
         error.response &&
@@ -37,7 +45,7 @@ export default function Login() {
         setLoading(false);
         return;
       }
-      toast.error(`Login failed: ${error.response ? error.response.data.message : error.message}`);
+      toast.error(`Login failed: ${error.response ? error.response.data.message : error.message} `);
       setLoading(false);
     }
   };
@@ -80,8 +88,11 @@ export default function Login() {
         </p>
       </div>
       <ToastContainer />
+      </div>
+      
+      
     </div>
-    </div>
+
 
   );
 }
