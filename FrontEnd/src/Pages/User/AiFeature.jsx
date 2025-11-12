@@ -12,6 +12,8 @@ function AiFeatures() {
   ]);
   const [loading, setLoading] = useState(false);
 
+  const userId = localStorage.getItem("userId");
+
   const askAI = async (e) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
@@ -22,16 +24,16 @@ function AiFeatures() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:5000/users/chat", {
+      const response = await fetch(`http://localhost:5000/users/chat/${userId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer 9b2df06c568547adb57389ae3233c454`,
         },
-        body: JSON.stringify({ message: userMessage }),
+        body: JSON.stringify({ message: userMessage  } , 31),
       });
 
-      if (!response.ok) throw new Error("Network error");
+      if (!response.ok) throw new Error("Network error" , 34);
       const data = await response.json();
 
       setMessages((prev) => [
@@ -54,7 +56,7 @@ function AiFeatures() {
 
   return (
     <>
-      {/* ✅ Custom AI Floating Button */}
+     
       <div
         className="fixed right-10 bottom-7 cursor-pointer text-white z-50"
         onMouseEnter={() => setMouseOver(true)}
@@ -79,7 +81,7 @@ function AiFeatures() {
             className="transition-colors duration-300"
           />
           {isOpen ? (
-            // cross icon
+           
             <path
               d="M60 60 L140 140 M140 60 L60 140"
               stroke="white"
@@ -88,7 +90,7 @@ function AiFeatures() {
               className="transition-colors duration-300"
             />
           ) : (
-              // text AI icon
+             
             <text
               x="100"
                 y="125"
@@ -113,15 +115,12 @@ function AiFeatures() {
         </svg>
       </div>
 
-      {/* ✅ Chat Window (toggles open/close) */}
+      
       {isOpen && (
         <div className="fixed top-20 left-70 shadow-2xl shadow-black  mr-4 bg-white p-6 rounded-lg border border-gray-300 w-[1000px] h-[600px] flex flex-col transition-all z-100">
           {/* Header */}
-          <div className="flex flex-col space-y-1.5 pb-4 border-b">
-            <h2 className="font-semibold text-lg tracking-tight">Chatbot</h2>
-            <p className="text-sm text-gray-500 leading-3">
-              Powered by Mendable and Vercel
-            </p>
+          <div className="flex flex-col space-y-1.5 pb-4 border-b justify-items-center items-center">
+            <h2 className="font-bold text-lg tracking-tight">Chat Bot For Task Master</h2>
           </div>
 
           {/* Messages */}

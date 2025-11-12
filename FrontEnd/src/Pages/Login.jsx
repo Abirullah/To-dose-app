@@ -30,8 +30,10 @@ export default function Login() {
       navigate("/dishboard")
       
       const { token } = response.data
+      const { user } = response.data;
       
       localStorage.setItem("authToken", token);
+      localStorage.setItem("userId", user[0]._id);
 
     } catch (error) {
       if (

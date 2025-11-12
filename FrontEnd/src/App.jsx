@@ -5,7 +5,6 @@ import { BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import OTPconformationPage from './Pages/OTPconformationPage';
 import Login from './Pages/Login';
 import HomePage from './Pages/HomePage';
-import Header from './Components/Header';
 import UserDishBoard from '../src/Pages/User/DishBoard'
 
 
@@ -18,7 +17,6 @@ function App() {
 
     // <PrivatePage/>
     <Router>
-      <Header/>
       <Routes>
         <Route path='/' element={<HomePage/>}/>
         <Route path='/AccountRegistration' element={<Registration/>}/>

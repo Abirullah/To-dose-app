@@ -1,15 +1,40 @@
 meta {
-  name: Update User 
+  name: Update User
   type: http
   seq: 7
 }
 
 post {
-  url: ee
-  body: none
+  url: http://localhost:5000/users/UpdateUserProfile/69008c64d7c27b823fb84d2b
+  body: multipartForm
   auth: inherit
+}
+
+headers {
+  Authorization: barrer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NjE2NDM3MDAsImV4cCI6MTc2MTczMDEwMH0.usGROBn6QnB8NgJ6C5SqDGejsUWwrS4telMGFcoAZqw
+}
+
+body:json {
+   {
+      "_id": "68ff1a67d170449a018ad511",
+      "name": "Father",
+      "email": "abdullahafridi5152@gmail.com"
+     
+    }
+  
+}
+
+body:multipart-form {
+  file: @file(C:\Users\abira\Pictures\Screenshots\Screenshot (7).png)
+  name: hadaf
+  email: pshfcspm2303901@hadaf.edu.pk
+}
+
+body:file {
+  file: @file(C:\Users\abira\Pictures\Screenshot 2025-10-19 094942.png) @contentType(image/png)
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

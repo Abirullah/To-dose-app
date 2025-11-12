@@ -1,56 +1,63 @@
+import express from "express";
+import AIChatHistoryModel from "../Modells/AI chating history.js";
+import User from "../Modells/UserModle.js";
+import axios from "axios";
 import { config } from "dotenv";
-import OpenAI from "openai";
 
 config();
 
-const apiKey = process.env.OPENAI_API_KEY.trim();
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY.trim(),
-  baseURL: "https://openrouter.ai/api/v1",
-  defaultHeaders: {
-    "HTTP-Referer": "http://localhost:3000",
-    "X-Title": "My Chatbot App",
-  },
-});
-
-console.log("Loaded API key:", apiKey ? "Yes" : "No");
-
 const AiFeature = async (req, res) => {
   try {
-    // Optional: Check Authorization header matches your expected token
-    // Example:
-    const authHeader = req.headers.authorization || "";
-    const expectedToken = "9b2df06c568547adb57389ae3233c454"; // match frontend token
-    if (
-      !authHeader.startsWith("Bearer ") ||
-      authHeader.slice(7) !== expectedToken
-    ) {
-      return res.status(401).json({ error: "Unauthorized" });
+   const  userId = req.params.userId;
+
+    const user = await
+      User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
+
 
     const { message } = req.body;
-    if (!message) {
-      return res.status(400).json({ error: "Message is required" });
-    }
+    if (!message) return res.status(400).json({ error: "Message is required" });
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // make sure this model is available on your account
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are an AI that writes clear, well-formatted answers using proper paragraphs, headings, and bullet points (no markdown symbols like ** or #).",
+    const response = await axios.post(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are an AI that writes clear, formatted answers using paragraphs and bullet points (no markdown symbols).",
+          },
+          { role: "user", content: message },
+        ],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": "http://localhost:3000", 
+          "X-Title": "My Chatbot App",
         },
+      }
+    );
+
+    AIChatHistoryModel.create({
+      userId: user._id,
+      messages: [
         { role: "user", content: message },
+        { role: "assistant", content: response.data.choices[0].message.content },
       ],
     });
 
-    res.json({ reply: completion.choices[0].message.content });
+
+    res.json({ reply: response.data.choices[0].message.content });
   } catch (error) {
-    console.error("AI API Error:", error);
+    console.error("AI API Error:", error.response?.data || error.message);
     res.status(500).json({ error: "AI service failed." });
   }
 };
+
 
 export { AiFeature };

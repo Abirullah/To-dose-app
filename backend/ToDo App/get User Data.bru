@@ -5,15 +5,12 @@ meta {
 }
 
 get {
-  url: /GetUserProfile/:userId
+  url: http://localhost:5000/users/GetUserProfile/68ff1a67d170449a018ad511
   body: none
   auth: inherit
 }
 
-params:path {
-  userId: 
-}
-
 settings {
   encodeUrl: true
+  timeout: 0
 }

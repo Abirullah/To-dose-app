@@ -15,18 +15,26 @@ const upload = multer({ dest: "ToDosApp/" });
 
 const UserRouter = express.Router({ mergeParams: true });
 
+
+// User routes
+
 UserRouter.post("/Register", UserController.Register);
 UserRouter.post("/VerifyOTP", UserController.VerifyOTP);
 UserRouter.post("/Login", UserController.Login);
 UserRouter.get("/GetUserProfile/:userId",verifyUserLoginStatius, UserController.GetUserProfile);
 
-UserRouter.post("/UpdateUserProfile/:userId",verifyUserLoginStatius , upload.single('file'), UserController.UpdateUserProfile);
+UserRouter.post("/UpdateUserProfile/:userId", verifyUserLoginStatius, upload.single('file'), UserController.UpdateUserProfile);
+
+
+//utils route to verify token
 
 UserRouter.post("/verify-token", verifyUserLoginStatius, (req, res) => {
   res.status(200).json({ message: "Token is valid", user: req.user });
 });
 
-UserRouter.post('/chat', AiFeature)
+// AI Feature route
+
+UserRouter.post("/chat/:userId", AiFeature);
 
 
 export default UserRouter;
