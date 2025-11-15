@@ -4,12 +4,26 @@ meta {
   seq: 8
 }
 
-get {
-  url: http://localhost:5000/tasks//AddTask/
-  body: none
+post {
+  url: http://localhost:5000/tasks/AddTask/69008c64d7c27b823fb84d2b
+  body: json
   auth: inherit
+}
+
+headers {
+  Authorization: barrer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NjI2OTQ1MzcsImV4cCI6MTc2Mjc4MDkzN30.Tm0Yvqlh_Vn69J3fi2SqfbsJPneyg3tj4CYGLJYItRw
+}
+
+body:json {
+  {
+    "workTitle": "Finish React Project",
+    "workDescription": "Complete the quiz app frontend",
+    "worksComletionTime": "2025-11-10T18:00:00Z",
+    "worksStatus": "pending"
+  }
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

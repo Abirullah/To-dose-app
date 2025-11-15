@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 const TeamTaskSchema = new mongoose.Schema(
   {
-
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -21,9 +20,12 @@ const TeamTaskSchema = new mongoose.Schema(
         },
         TaskStatus: {
           type: String,
-          default : "Pending"
-          
-        }
+          default: "Pending",
+        },
+        SubmittedTask: {
+          type: String,
+          default: "",
+        },
       },
     ],
 

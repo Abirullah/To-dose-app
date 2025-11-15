@@ -5,11 +5,33 @@ meta {
 }
 
 post {
-  url: 
-  body: none
+  url: http://localhost:5000/Tasks/UpdateTaskUsers/6918117670a964b5c5f774e8
+  body: json
   auth: inherit
+}
+
+headers {
+  Authorization: barrer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTZiNzY5NjEyOTU1YTFkNDZhYjcyNiIsImVtYWlsIjoicHNoZmNzcG0yMzAzOTAxQGhhZGFmLmVkdS5wayIsIm5hbWUiOiJBYmlyIiwiaWF0IjoxNzYzMTg1MTQ4LCJleHAiOjE3NjMyNzE1NDh9.Mi8A37FLHB-5u4E2AY9CaRmel9HiuIbTVx8HqoD0nrM
+}
+
+body:json {
+  {
+    "userId": "6916b769612955a1d46ab726",
+    "newUsers": [
+      {
+        "memberEmail":"TestUser4@gmail.com"
+      },
+      {
+        "memberEmail":"TestUser1@gmail.com"
+      
+      }
+    ]
+    
+  }
+  
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }

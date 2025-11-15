@@ -1,12 +1,17 @@
 import express from "express";
 import {
   AddTask,
+  UpdateTasks,
   updateUsersInTask,
-    getTeamTaskDetails,
-    DeleteTask,
-  TaskReplay
+  getTeamTaskDetails,
+  DeleteTask,
+  TaskSubmission
 } from "../Controller/TeamTaskController.js";
 import { verifyUserLoginStatius } from "../Utils/VerifyUser.js";
+
+import multer from "multer";
+
+const upload = multer({ dest: "ToDosApp/" });
 
 const TeamTasks = express.Router({ mergeParams: true });
 
@@ -16,6 +21,14 @@ TeamTasks.post(
     verifyUserLoginStatius,
     AddTask
 );
+
+TeamTasks.post(
+    '/UpdateTask/:id',
+    verifyUserLoginStatius,
+    UpdateTasks
+
+)
+
 TeamTasks.post(
     "/UpdateTaskUsers/:id",
     verifyUserLoginStatius,
@@ -34,8 +47,10 @@ TeamTasks.delete(
     DeleteTask)
 
 TeamTasks.post(
-    '/TaskReplay/:userId', verifyUserLoginStatius,
-    TaskReplay
-)
+    "/TaskSubmission/:userId",
+    verifyUserLoginStatius,
+    upload.single("file"),
+  TaskSubmission
+);
 
 export default TeamTasks;

@@ -4,27 +4,30 @@ import { AiFeature } from "../Utils/AiFeature.js";
 
 import { verifyUserLoginStatius } from "../Utils/VerifyUser.js";
 
-
-
 import multer from "multer";
-
 
 const upload = multer({ dest: "ToDosApp/" });
 
-
-
 const UserRouter = express.Router({ mergeParams: true });
-
 
 // User routes
 
 UserRouter.post("/Register", UserController.Register);
+
 UserRouter.post("/VerifyOTP", UserController.VerifyOTP);
 UserRouter.post("/Login", UserController.Login);
-UserRouter.get("/GetUserProfile/:userId",verifyUserLoginStatius, UserController.GetUserProfile);
+UserRouter.get(
+  "/GetUserProfile/:userId",
+  verifyUserLoginStatius,
+  UserController.GetUserProfile
+);
 
-UserRouter.post("/UpdateUserProfile/:userId", verifyUserLoginStatius, upload.single('file'), UserController.UpdateUserProfile);
-
+UserRouter.post(
+  "/UpdateUserProfile/:userId",
+  verifyUserLoginStatius,
+  upload.single("file"),
+  UserController.UpdateUserProfile
+);
 
 //utils route to verify token
 
@@ -35,6 +38,5 @@ UserRouter.post("/verify-token", verifyUserLoginStatius, (req, res) => {
 // AI Feature route
 
 UserRouter.post("/chat/:userId", AiFeature);
-
 
 export default UserRouter;

@@ -10,11 +10,12 @@ import  uploadToCloudinary  from "../Utils/Cloudnary.js";
 
 config();
 
-const JWT_SECRET_kEY = process.env.JWT_SECRET
+const JWT_SECRET_kEY = process.env.JWT_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN
 
 
 const generateToken = (user) => {
+  //  console.log("USER PASSED TO TOKEN:", user)
   return jwt.sign(
     { id: user._id, email: user.email, name: user.name },
     JWT_SECRET_kEY,
@@ -134,7 +135,9 @@ const Login = async (req, res) => {
       .json({ message: "Please verify your email before logging in" });
   }
 
-   const token = generateToken(user);
+  console.log("User Durning Logining : " + user)
+
+   const token = generateToken(user[0]);
 
   return res.status(200).json({token, message: "Login successful", user });
 };
