@@ -1,19 +1,45 @@
 import express from "express";
+import mongoose from "mongoose";
 import UserWorksModel from "../Modells/UserWorksModel.js";
+import User from "../Modells/UserModle.js"
+
 
 const AddTask = async (req, res) => {
   try {
-    const { workTitle, workDescription, worksComletionTime } = req.body;
+    const { workTitle, workDescription, worksComletionTime   } = req.body;
 
-    if (!workTitle || !workDescription || !worksComletionTime) {
+    const UserId = req.params.userId;
+
+    if (!UserId || !workTitle || !workDescription || !worksComletionTime) {
       return res.status(400).json({ error: "All fields are required" });
     }
 
+    const userDetails = await User.findById(UserId)
+
+    if(!userDetails) res.status(404).json("User not found")
+    
+    
+    const existingUserTasks = await UserWorksModel.findOne({ userId: UserId });
+
+    if (existingUserTasks) {
+      existingUserTasks.WorkCollection.push({
+        workTitle,
+        workDescription,
+        worksComletionTime,
+      });
+      await existingUserTasks.save();
+      return res.status(201).json({ message: "Task added successfully" });
+    }
+
     const newTask = new UserWorksModel({
-      workTitle,
-      workDescription,
-      worksComletionTime,
       userId: req.params.userId,
+      WorkCollection: [
+        {
+          workTitle,
+          workDescription,
+          worksComletionTime,
+        },
+      ],
     });
     await newTask.save();
 
@@ -23,8 +49,91 @@ const AddTask = async (req, res) => {
   }
 };
 
+const GetTasks = async (req, res) => {
+  const UserId = req.params.userId 
+  if(!UserId) res.status(401).json("Unauthorized")
+
+  const UserAllTasks = await UserWorksModel.find({ userId: UserId })
+  
+  res.json(UserAllTasks)
+}
+
+const DeleteTask = async (req, res) => {
+  const TaskId = req.params.TaskId;
+  const {UserId} = req.body
+
+  if (!TaskId) res.status(404).json("plase select a tas to delete")
+  
+  const TaskToDelete = await UserWorksModel.findById(TaskId)
+
+  const TaskUserID = TaskToDelete.userId.toString();
+
+  // console.log([TaskUserID , UserId]);
+
+  if(UserId !== TaskUserID) res.status(401).json("You can't able to delete that task");
+
+  const DeletedTask = await UserWorksModel.deleteOne({_id : TaskId})
+
+  res.status(201).json(" Task Deleted succefully ");
+}
+
+const UpdateTask = async (req, res) => {
+    const UserId = req.params.userId ;
+  const {
+    workTitle, workDescription, worksComletionTime, worksStatus, TaskId , TaskMasterId
+  } = req.body;
+
+  if (!TaskId) res.status(404).json("plase select a task to Update");
+
+  if (!workTitle || !workDescription || !worksComletionTime || !worksStatus || !TaskMasterId || !UserId) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  const UsersAllTaskCollection = await UserWorksModel.findById(TaskMasterId);
+  if (!UsersAllTaskCollection) res.status(404).json("You have no tasks collection")
+  if(UsersAllTaskCollection.userId.toString() !== UserId)
+    res.status(401).json("You are not authorized to update this task collection");
+  const TaskToUpdate = 
+    UsersAllTaskCollection.WorkCollection.filter(
+      (task) => task._id.toString() === TaskId
+    )
+  if (TaskToUpdate.length === 0)
+    res.status(404).json("Task not found");
+  
+
+  const UpdatedUserTasks = await UserWorksModel.findOneAndUpdate(
+    {
+      _id: TaskMasterId,
+      "WorkCollection._id": TaskId,
+    },
+    {
+      $set: {
+        "WorkCollection.$.workTitle": workTitle,
+        "WorkCollection.$.workDescription": workDescription,
+        "WorkCollection.$.worksComletionTime": worksComletionTime,
+        "WorkCollection.$.worksStatus": worksStatus,
+      },
+    },
+    { new: true } // return updated document
+  );
+  // save updated document
+  await UpdatedUserTasks.save();
+
+  const updatedItem = UpdatedUserTasks.WorkCollection.find(
+    (i) => i._id.toString() === TaskId
+  );
+
+  res.status(201).json({ message: "Task updated successfully", updatedItem , UpdatedUserTasks  });
+ 
+
+
+  
+}
 
 
 
 
-export default { AddTask };
+
+
+
+export default { AddTask, DeleteTask , UpdateTask , GetTasks};

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AiFeatures from "./AiFeature";
 import Header from "../../Components/Header";
+import AiButton from "../../Components/AiButton";
+import UnderProcessWork from "./UnderProcessWork";
 
 const menuItems = [
   { key: "todo", label: "Works To Do" },
@@ -10,19 +12,26 @@ const menuItems = [
   { key: "missed", label: "Missed Works" },
 ];
 
+const CurrentPageKey = localStorage.getItem("CurrentPage") || "todo";
+
 function UserDishBoard() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [selected, setSelected] = useState("todo");
+  const [selected, setSelected] = useState(CurrentPageKey);
   const [userProfile, setUserProfile] = useState([]);
+  const [AiPage, setAiPage] = useState(false);
 
   const navigate = useNavigate();
+
+  localStorage.setItem("CurrentPage", selected);
+
+
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     if (!token) {
       navigate("/AccountLogin");
     } else {
-      //get user profile data
+      
       const userId = localStorage.getItem("userId");
       fetch(`http://localhost:5000/users/GetUserProfile/${userId}`, {
         method: "GET",
@@ -45,8 +54,6 @@ function UserDishBoard() {
         .catch((error) => {
           console.error("Error fetching user profile:", error);
         });
-      
-
     }
   }, [navigate]);
 
@@ -55,18 +62,17 @@ function UserDishBoard() {
       case "todo":
         return (
           <div className="p-6 justify-center items-center flex flex-col">
-
             {/* Replace with your To Do works list */}
-            <h2 className="text-xl font-bold mb-4">Works To Do</h2>
+            <h2 className="text-xl font-bold mb-4">Your Work Dishboard</h2>
             <p className="justify-center ">List of tasks to do...</p>
           </div>
         );
       case "process":
         return (
-          <div className="p-6 justify-center items-center flex flex-col">
-            <h2 className="text-xl font-bold mb-4">Under Process</h2>
-            <p>List of tasks in process...</p>
+          <div className="p-6 justify-center items-center flex flex-col w-full">
+            <UnderProcessWork />
           </div>
+          
         );
       case "completed":
         return (
@@ -88,9 +94,9 @@ function UserDishBoard() {
   };
 
   return (
-    <div>
+    <div className="relative">
       <Header />
-      <div className="flex bg-gray-50">
+      <div className="flex bg-gray-50 ">
         {/* Sidebar for large screens */}
         <aside className="hidden md:flex flex-col w-64 bg-white shadow-lg fixed h-[100vh]">
           <nav className="flex-1 p-4 space-y-2">
@@ -156,12 +162,27 @@ function UserDishBoard() {
         )}
 
         {/* Main dashboard */}
-        <main className="flex-1 overflow-y-auto">{renderContent()}</main>
-
-        <div className="flex w-full h-full  ">
+        <main className="flex lg:ml-[15%] overflow-y-auto w-full justify-center items-center 
+        ">{renderContent()}</main>
+      </div>
+      {!AiPage && (
+        <AiButton
+          onClick={() => {
+            setAiPage((prev) => !prev);
+          }}
+        />
+      )}
+      
+      {AiPage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
+          <AiButton
+            onClick={() => {
+              setAiPage((prev) => !prev);
+            }}
+          />
           <AiFeatures />
         </div>
-      </div>
+      )}
     </div>
   );
 }

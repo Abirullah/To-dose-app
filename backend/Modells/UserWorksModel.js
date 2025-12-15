@@ -1,13 +1,8 @@
 import mongoose from "mongoose";
 
-const UserWorksSchema = new mongoose.Schema(
-  {
-        userId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true
-        },
-        workTitle: {
+
+const WorkDetails = new mongoose.Schema({
+     workTitle: {
             type: String,
             required: true
         },
@@ -21,12 +16,24 @@ const UserWorksSchema = new mongoose.Schema(
         },
         worksComletionTime: {
             type: Date,
+            required : true
         },
         worksStatus: {
             type: String,
             enum: ['pending', 'in-progress', 'completed'],
             default: 'pending'
-        }
+    }
+});
+
+const UserWorksSchema = new mongoose.Schema(
+  {
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true
+        },
+      WorkCollection: [WorkDetails]
+       
   },
   { timestamps: true }
 );

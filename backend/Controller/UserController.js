@@ -6,6 +6,7 @@ import UserModel from "../Modells/UserModle.js";
 import nodemailar from "nodemailer";
 import bcrypt from "bcrypt";
 import  uploadToCloudinary  from "../Utils/Cloudnary.js";
+import UserWorksModel from "../Modells/UserWorksModel.js";
 
 
 config();
@@ -193,6 +194,20 @@ const GetUserProfile = async (req, res) => {
   }
 };
 
+const DeleteUser = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const user = await UserModel.findByIdAndDelete(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 
 
 
@@ -202,5 +217,6 @@ export default {
   Login,
   VerifyOTP,
   UpdateUserProfile,
-  GetUserProfile
+  GetUserProfile,
+  DeleteUser,
 };

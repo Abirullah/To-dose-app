@@ -1,8 +1,6 @@
 import React from 'react'
 import { useEffect } from 'react';
-
 import { useNavigate } from 'react-router-dom';
-
 import './Pages.css'
 import '../Components/Components.css'
  import AOS from "aos";

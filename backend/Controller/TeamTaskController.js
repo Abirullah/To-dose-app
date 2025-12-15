@@ -249,9 +249,9 @@ export const TaskSubmission = async (req, res) => {
   try {
     const userId = req.params.userId;
 
-    const { TaskId, TaskReplay } = req.body;
+    const { TaskId } = req.body;
 
-    if (!userId || !TaskId || !TaskReplay) {
+    if (!userId || !TaskId) {
       res.status(400).json("Missing Required Fields");
     }
 

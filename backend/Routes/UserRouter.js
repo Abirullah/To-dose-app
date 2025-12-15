@@ -1,6 +1,7 @@
 import express from "express";
 import UserController from "../Controller/UserController.js";
-import { AiFeature } from "../Utils/AiFeature.js";
+import { AiFeature, GetAIChatHistory } from "./AiFeatureRoutes.js";
+import TaskController from "../Controller/TaskController.js";
 
 import { verifyUserLoginStatius } from "../Utils/VerifyUser.js";
 
@@ -28,6 +29,25 @@ UserRouter.post(
   upload.single("file"),
   UserController.UpdateUserProfile
 );
+UserRouter.delete(
+  "/DeleteUser/:userId",
+  verifyUserLoginStatius,
+  UserController.DeleteUser
+);
+
+//users tasks routes
+
+UserRouter.get(
+  "/GetUserTasks/:userId",
+  verifyUserLoginStatius,
+   TaskController.GetTasks
+);
+UserRouter.put(
+  "/UpdateTask/:userId",
+  verifyUserLoginStatius,
+  TaskController.UpdateTask
+);
+
 
 //utils route to verify token
 
@@ -37,6 +57,7 @@ UserRouter.post("/verify-token", verifyUserLoginStatius, (req, res) => {
 
 // AI Feature route
 
-UserRouter.post("/chat/:userId", AiFeature);
+UserRouter.post("/chat/:userId",verifyUserLoginStatius, AiFeature);
+UserRouter.get("/get-chats/:userId",verifyUserLoginStatius, GetAIChatHistory);
 
 export default UserRouter;

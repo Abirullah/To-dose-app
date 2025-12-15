@@ -6,10 +6,26 @@ const TaskRoutes = express.Router({ mergeParams: true });
 
 // Task routes
 
-TaskRoutes.post("/AddTask/:userId", TaskController.AddTask);
-// TaskRoutes.get("/GetTasks/:userId", TaskController.GetTasks);
-// TaskRoutes.put("/UpdateTask/:taskId", TaskController.UpdateTask);
-// TaskRoutes.delete("/DeleteTask/:taskId", TaskController.DeleteTask);
+TaskRoutes.post(
+    "/AddTask/:userId",
+    verifyUserLoginStatius,
+    TaskController.AddTask
+);
+TaskRoutes.get(
+    "/GetTasks/:userId",
+    verifyUserLoginStatius,
+    TaskController.GetTasks
+);
+TaskRoutes.put(
+    "/UpdateTask/:TaskId",
+    verifyUserLoginStatius,
+    TaskController.UpdateTask
+);
+TaskRoutes.delete(
+    "/DeleteTask/:TaskId",
+    verifyUserLoginStatius,
+    TaskController.DeleteTask
+);
 
 
 
