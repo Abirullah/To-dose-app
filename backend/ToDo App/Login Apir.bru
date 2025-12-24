@@ -1,0 +1,23 @@
+meta {
+  name: Login Apir
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:5000/users/Login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "email": "pshfcspm2303901@hadaf.edu.pk",
+    "password" : "testUser3"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

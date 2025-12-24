@@ -1,0 +1,26 @@
+meta {
+  name: AI Chatbot
+  type: http
+  seq: 18
+}
+
+post {
+  url: http://localhost:5000/users/chat/6916b769612955a1d46ab726
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: barrier eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5MTZiNzY5NjEyOTU1YTFkNDZhYjcyNiIsImVtYWlsIjoicHNoZmNzcG0yMzAzOTAxQGhhZGFmLmVkdS5wayIsIm5hbWUiOiJBYmlyIiwiaWF0IjoxNzYzOTg1MTkyLCJleHAiOjE3NjQwNzE1OTJ9.XsK_pyx2NzmCctNQZ67KqE_1HYR8xdQcx5HxjvdDm2g
+}
+
+body:json {
+  {
+    "message" : "by"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,28 @@
+meta {
+  name: Delete A specific Task from it
+  type: http
+  seq: 12
+}
+
+delete {
+  url: http://localhost:5000/Tasks/DeleteTask/69008c64d7c27b823fb84d2b
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Barer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NjI4NDQ0OTksImV4cCI6MTc2MjkzMDg5OX0.wmeN_63-Hagd2oX8lEIaE9uTncX8AOinFyX0Nu461SY
+}
+
+body:json {
+  {
+    "teamTaskId": "6912eee932a14a9fe0a263f0",
+    "taskId": "6912eee932a14a9fe0a263f4"
+  }
+  
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

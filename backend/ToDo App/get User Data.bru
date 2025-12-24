@@ -1,0 +1,16 @@
+meta {
+  name: get User Data
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://localhost:5000/users/GetUserProfile/68ff1a67d170449a018ad511
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
