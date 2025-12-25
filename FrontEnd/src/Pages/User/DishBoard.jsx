@@ -4,6 +4,9 @@ import AiFeatures from "./AiFeature";
 import Header from "../../Components/Header";
 import AiButton from "../../Components/AiButton";
 import UnderProcessWork from "./UnderProcessWork";
+import PendingWorks from "./PendingWorks";
+import CompletedWorks from "./CompletedWorks";
+import MissedWorks from "./MissedWorks";
 
 const menuItems = [
   { key: "todo", label: "Works To Do" },
@@ -62,9 +65,7 @@ function UserDishBoard() {
       case "todo":
         return (
           <div className="p-6 justify-center items-center flex flex-col">
-            {/* Replace with your To Do works list */}
-            <h2 className="text-xl font-bold mb-4">Your Work Dishboard</h2>
-            <p className="justify-center ">List of tasks to do...</p>
+            <PendingWorks />            
           </div>
         );
       case "process":
@@ -77,15 +78,13 @@ function UserDishBoard() {
       case "completed":
         return (
           <div className="p-6 justify-center items-center flex flex-col">
-            <h2 className="text-xl font-bold mb-4">Completed Works</h2>
-            <p>List of completed tasks...</p>
+            <CompletedWorks />
           </div>
         );
       case "missed":
         return (
           <div className="p-6 justify-center items-center flex flex-col">
-            <h2 className="text-xl font-bold mb-4">Missed Works</h2>
-            <p>List of missed tasks...</p>
+            <MissedWorks />
           </div>
         );
       default:

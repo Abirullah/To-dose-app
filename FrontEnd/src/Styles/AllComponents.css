@@ -1,0 +1,118 @@
+.book,
+.book__pg-shadow,
+.book__pg {
+  animation: cover 5s ease-in-out infinite;
+}
+
+.book {
+  background-color: hsl(268, 90%, 65%);
+  border-radius: 0.25em;
+  box-shadow:
+    0 0.25em 0.5em hsla(0, 0%, 0%, 0.3),
+    0 0 0 0.25em hsl(278, 100%, 57%) inset;
+  padding: 0.25em;
+  perspective: 37.5em;
+  position: relative;
+  width: 8em;
+  height: 6em;
+  transform-style: preserve-3d;
+}
+
+.book__pg-shadow,
+.book__pg {
+  position: absolute;
+  left: 0.25em;
+  width: calc(50% - 0.25em);
+}
+
+.book__pg-shadow {
+  animation-name: shadow;
+  background-image: linear-gradient(
+    -45deg,
+    hsla(0, 0%, 0%, 0) 50%,
+    hsla(0, 0%, 0%, 0.3) 50%
+  );
+  filter: blur(0.25em);
+  top: calc(100% - 0.25em);
+  height: 3.75em;
+  transform-origin: 100% 0%;
+}
+
+.book__pg {
+  animation-name: pg1;
+  background-color: hsl(223, 10%, 100%);
+  background-image: linear-gradient(
+    90deg,
+    hsla(223, 10%, 90%, 0) 87.5%,
+    hsl(223, 10%, 90%)
+  );
+  height: calc(100% - 0.5em);
+  transform-origin: 100% 50%;
+}
+
+.book__pg--2,
+.book__pg--3,
+.book__pg--4 {
+  background-image: repeating-linear-gradient(
+      hsl(223, 10%, 10%) 0 0.125em,
+      hsla(223, 10%, 10%, 0) 0.125em 0.5em
+    ),
+    linear-gradient(
+      90deg,
+      hsla(223, 10%, 90%, 0) 87.5%,
+      hsl(223, 10%, 90%)
+    );
+}
+
+.book__pg--2 { animation-name: pg2; }
+.book__pg--3 { animation-name: pg3; }
+.book__pg--4 { animation-name: pg4; }
+.book__pg--5 { animation-name: pg5; }
+
+/* ================= ANIMATIONS ================= */
+
+@keyframes cover {
+  from, 5%, 45%, 55%, 95%, to {
+    background-color: hsl(278, 84%, 67%);
+  }
+  10%, 40%, 60%, 90% {
+    background-color: hsl(271, 90%, 45%);
+  }
+}
+
+@keyframes shadow {
+  from { transform: scaleY(0) rotateY(0); }
+  50% { transform: scaleY(0.2) rotateY(90deg); }
+  to { transform: scaleY(0) rotateY(180deg); }
+}
+
+@keyframes pg1 { to { transform: rotateY(180deg); } }
+@keyframes pg2 { to { transform: rotateY(179deg); } }
+@keyframes pg3 { to { transform: rotateY(178deg); } }
+@keyframes pg4 { to { transform: rotateY(177deg); } }
+@keyframes pg5 { to { transform: rotateY(176deg); } }
+
+
+
+
+
+
+
+
+
+.loader {
+  border-top-color: #3498db;
+  animation: spin 1s infinite linear;
+}   
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.SHADOW {
+    box-shadow: 0 8px 10px rgba(0, 0, 0, 0.1), 0 10px 3px rgba(0, 0, 0, 0.06);
+}

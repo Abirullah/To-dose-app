@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { User_Own_Tasks } from "../../APIsRelatedTasks/ApiCaller";
-import Loader from "../../Components/Loader";
 
-function UnderProcessWork() {
+function MissedWorks() {
   const [underProcessWorks, setUnderProcessWorks] = useState([]);
   const [TaskId, setTaskId] = useState("");
   const [UpdateWorkStatus, setUpdateWorkStatus] = useState(0);
@@ -19,13 +18,12 @@ function UnderProcessWork() {
   }
 
 
-
   useEffect(() => {
     async function getTasks() {
       const workCollection = await User_Own_Tasks(userId, token);
       const InProgressTasks = workCollection.filter(
-        (task) => task.worksStatus === "in-progress"
-      );
+          (task) => task.worksStatus != "completed" && task.worksComletionTime < new Date().toISOString()
+        );
 
       setUnderProcessWorks(InProgressTasks);
     }
@@ -43,8 +41,7 @@ function UnderProcessWork() {
             No works are currently under process.
           </p>
         ) : (
-            <div className="w-[100%] flex flex-col gap-4 bg-white p-4 rounded-lg shadow-md">
-             <Loader />
+          <div className="w-[100%] flex flex-col gap-4 bg-white p-4 rounded-lg shadow-md">
             {underProcessWorks.map((work) => (
               <div key={work._id} className=" p-2 rounded-lg shadow-md flex  ">
                 <div className="w-[80%]">
@@ -107,4 +104,4 @@ function UnderProcessWork() {
   );
 }
 
-export default UnderProcessWork;
+export default MissedWorks;

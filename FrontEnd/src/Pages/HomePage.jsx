@@ -2,7 +2,7 @@ import React from 'react'
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Pages.css'
-import '../Components/Components.css'
+import '../Styles/AllComponents.css'
  import AOS from "aos";
 import "aos/dist/aos.css";
 import Header from "../Components/Header";
