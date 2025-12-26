@@ -8,11 +8,12 @@ function AiFeatures() {
   const [UserPointText, setUserPointText] = useState(null);
   const bottomRef = useRef(null);
   const [inputValue, setInputValue] = useState("");
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState();
   const [chatEachDayHistory, setchatEachDayHistory] = useState([]);
 
   const userId = localStorage.getItem("userId");
   const UserAuthToken = localStorage.getItem("authToken");
+  
 
   let userMessage = "";
 
@@ -160,7 +161,7 @@ function AiFeatures() {
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto pr-2 mt-4">
-          {messages > 0 ? (
+          {messages && messages.length > 0 ? (
             messages.map((item, idx) => (
               <div key={item._id || idx}>
                 {/* USER MESSAGE */}

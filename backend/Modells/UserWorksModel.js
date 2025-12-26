@@ -20,7 +20,7 @@ const WorkDetails = new mongoose.Schema({
         },
         worksStatus: {
             type: String,
-            enum: ['pending', 'in-progress', 'completed'],
+            enum: ['pending', 'in-progress', 'completed', 'missed'],
             default: 'pending'
     }
 });
