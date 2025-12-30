@@ -35,18 +35,6 @@ UserRouter.delete(
   UserController.DeleteUser
 );
 
-//users tasks routes
-
-UserRouter.get(
-  "/GetUserTasks/:userId",
-  verifyUserLoginStatius,
-   TaskController.GetTasks
-);
-UserRouter.put(
-  "/UpdateTask/:userId",
-  verifyUserLoginStatius,
-  TaskController.UpdateTask
-);
 
 
 //utils route to verify token

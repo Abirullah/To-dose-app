@@ -7,7 +7,7 @@ const Routers = express.Router();
 
 Routers.use("/users", UserRouter)
 Routers.use("/tasks", TaskRoutes);
-Routers.use('/Tasks' , TeamTasks )
+Routers.use('/TeamTasks' , TeamTasks )
 
 
 export default Routers;

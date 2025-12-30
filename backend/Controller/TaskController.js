@@ -1,5 +1,3 @@
-import express from "express";
-import mongoose from "mongoose";
 import UserWorksModel from "../Modells/UserWorksModel.js";
 import User from "../Modells/UserModle.js"
 
@@ -59,23 +57,30 @@ const GetTasks = async (req, res) => {
 }
 
 const DeleteTask = async (req, res) => {
-  const TaskId = req.params.TaskId;
-  const {UserId} = req.body
+  const { TaskId } = req.params;
+  const { UserId } = req.body;
 
-  if (!TaskId) res.status(404).json("plase select a tas to delete")
-  
-  const TaskToDelete = await UserWorksModel.findById(TaskId)
+  if (!TaskId) {
+    return res.status(400).json("Please select a task to delete");
+  }
 
-  const TaskUserID = TaskToDelete.userId.toString();
+  const userDoc = await UserWorksModel.findOne({
+    userId: UserId,
+    "WorkCollection._id": TaskId,
+  });
 
-  // console.log([TaskUserID , UserId]);
+  if (!userDoc) {
+    return res.status(404).json("Task not found");
+  }
 
-  if(UserId !== TaskUserID) res.status(401).json("You can't able to delete that task");
+  await UserWorksModel.updateOne(
+    { userId: UserId },
+    { $pull: { WorkCollection: { _id: TaskId } } }
+  );
 
-  const DeletedTask = await UserWorksModel.deleteOne({_id : TaskId})
+  return res.status(200).json({ message: "Task deleted successfully" });
+};
 
-  res.status(201).json(" Task Deleted succefully ");
-}
 
 const UpdateTask = async (req, res) => {
     const UserId = req.params.userId ;

@@ -1,9 +1,12 @@
 import DropDown from "./DropDown";
-import  { useState } from "react";
+import { useState } from "react";
+import { Update_Task , Delete_Task } from "../APIsRelatedTasks/ApiCaller";
 
 function TaskDetails({ workDetails, setWorkDetails }) {
     const [DropDownStatus, setDropDownStatus] = useState(false);
 
+
+    
 
     const HandleDropDownOperation = () => {
         if (workDetails.worksStatus === "completed") {
@@ -11,6 +14,7 @@ function TaskDetails({ workDetails, setWorkDetails }) {
                 <div className="absolute right-10 bottom-65 w-48 bg-white rounded shadow-lg">
                     <DropDown
                         Delete="Delete Task"
+                        workDetails={workDetails}
                     />
                 </div>
             );
@@ -22,6 +26,7 @@ function TaskDetails({ workDetails, setWorkDetails }) {
                         Edit="Edit Task"
                         Delete="Delete Task"
                         MarkAsCompleted="Mark as Completed"
+                        workDetails={workDetails}
                     />
                 </div>
             );
@@ -33,6 +38,7 @@ function TaskDetails({ workDetails, setWorkDetails }) {
                         Edit="Edit Task"
                         Delete="Delete Task"
                         MarkAsCompleted="Start Task"
+                        workDetails={workDetails}
                     />
                 </div>
             );
@@ -44,6 +50,7 @@ function TaskDetails({ workDetails, setWorkDetails }) {
                   Edit="Edit Task"
                   Delete="Delete Task"
                   MarkAsCompleted="Change Due Date"
+                 workDetails={workDetails}
                 />
               </div>
             );

@@ -17,7 +17,7 @@ TaskRoutes.get(
     TaskController.GetTasks
 );
 TaskRoutes.put(
-    "/UpdateTask/:TaskId",
+    "/UpdateTask/:userId",
     verifyUserLoginStatius,
     TaskController.UpdateTask
 );

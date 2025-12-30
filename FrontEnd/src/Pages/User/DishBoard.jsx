@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import AiFeatures from "./AiFeature";
 import Header from "../../Components/Header";
 import AiButton from "../../Components/AiButton";
 import UnderProcessWork from "./UnderProcessWork";
 import PendingWorks from "./PendingWorks";
 import CompletedWorks from "./CompletedWorks";
 import MissedWorks from "./MissedWorks";
+
 
 const menuItems = [
   { key: "todo", label: "Works To Do" },
@@ -21,7 +21,7 @@ function UserDishBoard() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [selected, setSelected] = useState(CurrentPageKey);
   const [userProfile, setUserProfile] = useState([]);
-  const [AiPage, setAiPage] = useState(false);
+ 
 
   const navigate = useNavigate();
 
@@ -164,24 +164,8 @@ function UserDishBoard() {
         <main className="flex lg:ml-[15%] overflow-y-auto w-full justify-center items-center 
         ">{renderContent()}</main>
       </div>
-      {!AiPage && (
-        <AiButton
-          onClick={() => {
-            setAiPage((prev) => !prev);
-          }}
-        />
-      )}
+      <AiButton />
       
-      {AiPage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm">
-          <AiButton
-            onClick={() => {
-              setAiPage((prev) => !prev);
-            }}
-          />
-          <AiFeatures />
-        </div>
-      )}
     </div>
   );
 }

@@ -1,15 +1,12 @@
 export async function User_Own_Tasks(userId, token) {
   try {
-    const res = await fetch(
-      `http://localhost:5000/users/GetUserTasks/${userId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const res = await fetch(`http://localhost:5000/tasks/GetTasks/${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     const data = await res.json();
 
@@ -41,7 +38,7 @@ export async function User_Own_Tasks(userId, token) {
 export async function Update_Task(userId, taskDetails, token) {
   try {
     const res = await fetch(
-      `http://localhost:5000/users/UpdateTask/${userId}`,
+      `http://localhost:5000/tasks/UpdateTask/${userId}`,
       {
         method: "PUT",
         headers: {
@@ -49,7 +46,6 @@ export async function Update_Task(userId, taskDetails, token) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(taskDetails),
-       
       }
     );
     const data = await res.json();
@@ -60,22 +56,24 @@ export async function Update_Task(userId, taskDetails, token) {
   }
 } 
 
-export async function Delete_Task(userId, taskId, token) {
+export async function Delete_Task(UserId, TaskId, token) {
   try {
+    console.log("deleting task id:", TaskId);
     const res = await fetch(
-      `http://localhost:5000/users/DeleteTask/${userId}/${taskId}`,
+      `http://localhost:5000/tasks/DeleteTask/${TaskId}`,
       {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({ UserId }),
       }
     );
     const data = await res.json();
-    console.log(data);
+    return data;
   } catch (err) {
-    console.log(err);
+    console.log(err.message);
     return null;
   }
 }
