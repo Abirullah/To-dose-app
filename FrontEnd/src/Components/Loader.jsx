@@ -1,4 +1,3 @@
-import React from 'react'
 import '../Styles/AllComponents.css'
 
 function Loader() {

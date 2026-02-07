@@ -1,8 +1,7 @@
-import React, { useState } from "react";
-import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../lib/api";
 
 export default function Registration() {
   const [formData, setFormData] = useState({
@@ -23,7 +22,7 @@ export default function Registration() {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post("http://localhost:5000/users/Register", formData);
+      await api.post("/users/Register", formData);
       toast.success("Registration successful! Please check your email for the OTP.");
       setLoading(false);
       setOtpStep(true);
@@ -50,7 +49,6 @@ export default function Registration() {
             </button>
           </div>
         </div>
-        <ToastContainer />
       </div>
     );
   }
@@ -105,10 +103,11 @@ export default function Registration() {
               {loading ? "Registering..." : "Register"}
             </button>
           </form>
-          <p className="justify-center mt-2 align-middle">Have an account? <a className="text-blue-700" href="http://localhost:5173/AccountLogin">Login</a></p>
+          <p className="justify-center mt-2 align-middle">
+            Have an account? <Link className="text-blue-700" to="/AccountLogin">Login</Link>
+          </p>
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 }

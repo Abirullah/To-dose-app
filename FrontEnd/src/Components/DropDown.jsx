@@ -1,8 +1,7 @@
-import { Delete_Task , Update_Task } from "../APIsRelatedTasks/ApiCaller";
+import { Delete_Task } from "../APIsRelatedTasks/ApiCaller";
 
 function DropDown({ Edit, Delete, MarkAsCompleted, workDetails }) {
     const token = localStorage.getItem("authToken");
-    const collectionId = localStorage.getItem("collectionId");
     const userId = localStorage.getItem("userId");
 
     const DeleteTheTask = (userId, TaskId, token) => async () => {

@@ -1,107 +1,96 @@
-import React, { useEffect , useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import AiSvg from "../../assets/ChatSvg.svg";
-import { useState } from "react";
+import api from "../../lib/api";
 
-function AiFeatures() {
-  const [loading, setLoading] = useState(false);
-  const [UserPointText, setUserPointText] = useState(null);
-  const bottomRef = useRef(null);
-  const [inputValue, setInputValue] = useState("");
-  const [messages, setMessages] = useState();
-  const [chatEachDayHistory, setchatEachDayHistory] = useState([]);
+const GlassCard = ({ children, className = "" }) => (
+  <div className={`rounded-2xl bg-white/5 ring-1 ring-white/10 backdrop-blur-xl ${className}`}>
+    {children}
+  </div>
+);
 
+export default function AiFeatures() {
   const userId = localStorage.getItem("userId");
-  const UserAuthToken = localStorage.getItem("authToken");
-  
 
-  let userMessage = "";
+  const bottomRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const [days, setDays] = useState([]);
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [messages, setMessages] = useState([]);
 
-  const FeatchUserAIHistory = async () => {
+  const todayKey = useMemo(() => {
+    const d = new Date();
+    return `${d.getDate()}/${d.getMonth() + 1}`;
+  }, []);
+
+  const loadHistory = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:5000/users/get-chats/${userId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${UserAuthToken}`,
-          },
-        }
-      );
+      const { data } = await api.get(`/users/get-chats/${userId}`);
+      const allDays = data?.history?.messages ?? [];
+      setDays(allDays);
 
-       if (response.status === 401 || response.status === 403) {
-         localStorage.removeItem("authToken");
-         localStorage.removeItem("userId");
-         window.location.href = "/AccountLogin";
-         return;
-       }
-      const data = await response.json();
-      setMessages(data);
-      const MessagesArray = data.history.messages;
-      setchatEachDayHistory(MessagesArray);
-
-      const today = new Date();
-
-      const TodayHistory = MessagesArray.filter((msg) => {
-        const msgDate = msg.timestamp;
-
-        return msgDate == `${today.getDate()}/${today.getMonth() + 1}`;
-      });
-
-      TodayHistory > 0 ? setMessages(TodayHistory[0].chats) : setMessages([]);
-    } catch (error) {
-      console.error("Error fetching AI chat history:", error);
+      const today = allDays.find((m) => m.timestamp === todayKey);
+      const initial = today ? today.chats : [];
+      setSelectedDay(today?.timestamp ?? todayKey);
+      setMessages(initial);
+    } catch {
+      setDays([]);
+      setSelectedDay(todayKey);
+      setMessages([]);
     }
+  };
+
+  useEffect(() => {
+    loadHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
+
+  const pickDay = (dayKey) => {
+    setSelectedDay(dayKey);
+    const day = days.find((d) => d.timestamp === dayKey);
+    setMessages(day?.chats ?? []);
   };
 
   const askAI = async (e) => {
     e.preventDefault();
-    if (!inputValue.trim()) return;
-    userMessage = inputValue;
-    setUserPointText(
-      <div className="flex gap-3 my-4 text-gray-700 text-sm justify-end">
-        <div className="bg-gray-100 px-3 py-2 rounded-lg max-w-[75%] leading-relaxed">
-          <ReactMarkdown>{userMessage}</ReactMarkdown>
-        </div>
-        <div className="rounded-full bg-gray-100 border p-1 w-8 h-8 flex items-center justify-center">
-          <span className="text-black font-bold text-xs">You</span>
-        </div>
-      </div>
-    );
+    const text = inputValue.trim();
+    if (!text) return;
+
     setInputValue("");
     setLoading(true);
+    setMessages((prev) => [
+      ...prev,
+      { UserMessageContant: text, AiReplayContant: "" },
+    ]);
 
     try {
-      const response = await fetch(
-        `http://localhost:5000/users/chat/${userId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${UserAuthToken}`,
-          },
-          body: JSON.stringify({ message: userMessage }, 31),
+      const { data } = await api.post(`/users/chat/${userId}`, { message: text });
+      setMessages((prev) => {
+        const copy = [...prev];
+        const last = copy[copy.length - 1];
+        if (last && last.UserMessageContant === text && !last.AiReplayContant) {
+          copy[copy.length - 1] = {
+            UserMessageContant: text,
+            AiReplayContant: data?.reply || "No response.",
+          };
+          return copy;
         }
-      );
-
-      if (!response.ok) throw new Error("Network error", 34);
-      const data = await response.json();
-
+        return [
+          ...copy,
+          { UserMessageContant: text, AiReplayContant: data?.reply || "No response." },
+        ];
+      });
+      await loadHistory();
+    } catch {
       setMessages((prev) => [
         ...prev,
         {
-          AiReplayContant: data.reply || "No response from AI.",
-          UserMessageContant: userMessage,
-        },
-      ]);
-    } catch (err) {
-      console.error(err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          AiReplayContant: "Something went wrong, please try again.",
-          UserMessageContant: userMessage,
+          UserMessageContant: "",
+          AiReplayContant: "Something went wrong. Try again.",
         },
       ]);
     } finally {
@@ -109,125 +98,105 @@ function AiFeatures() {
     }
   };
 
-  function AddThatTask(date) {
-    const GetSoecificDayHistory = chatEachDayHistory.filter((msg) => {
-      return msg.timestamp === date;
-    });
-
-    setMessages(GetSoecificDayHistory[0].chats);
-  }
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-
-  useEffect(() => {
-    FeatchUserAIHistory();
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("AiChatHistory", JSON.stringify(messages));
-  }, [messages]);
-
-  localStorage.setItem("AiChatHistory", JSON.stringify(messages));
-
   return (
-    <div className="flex w-full h-full justify-center items-center p-6">
-      <div className="shadow-2xl flex flex-col justify-self-center align-middle shadow-black bg-white p-6 rounded-lg border border-gray-300 w-[15%] h-[90%]  mr-5 ">
-        <h1 className="text-2xl font-bold text-center">Your Chat</h1>
-        <ul className="text-black flex flex-col mt-4">
-          {chatEachDayHistory.length > 0 ? (
-            chatEachDayHistory.map((Element) => (
-              <li
-                onClick={() => AddThatTask(Element.timestamp)}
-                key={Element.id || Element.timestamp}
-                className=" p-2 hover:bg-blue-100 text-center font-bold hover:scale-115 cursor-pointer pr-4"
-              >
-                {Element.timestamp}
-              </li>
-            ))
-          ) : (
-            <p className="">No history</p>
-          )}
-        </ul>
-      </div>
-      <div className="shadow-2xl flex justify-self-center align-middle shadow-black bg-white p-6 rounded-lg border border-gray-300 w-[80%] h-[82%] flex-col transition-all z-100">
-        {/* Header */}
-        <div className="flex flex-col space-y-1.5 pb-4 border-b justify-items-center items-center">
-          <h2 className="font-bold text-lg tracking-tight">
-            Chat Bot For Task Master
-          </h2>
+    <div className="grid gap-4 lg:grid-cols-[280px_1fr]">
+      <GlassCard className="p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="text-sm font-black text-white">Chat History</div>
+            <div className="text-xs text-white/60">Pick a day.</div>
+          </div>
+          <button
+            type="button"
+            onClick={loadHistory}
+            className="rounded-xl bg-white/5 px-3 py-2 text-xs font-black text-white/70 ring-1 ring-white/10 hover:bg-white/10 hover:text-white"
+          >
+            Refresh
+          </button>
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto pr-2 mt-4">
-          {messages && messages.length > 0 ? (
-            messages.map((item, idx) => (
-              <div key={item._id || idx}>
-                {/* USER MESSAGE */}
-                {item.UserMessageContant && (
-                  <div className="flex gap-3 my-4 text-gray-700 text-sm justify-end">
-                    <div className="bg-gray-100 px-3 py-2 rounded-lg max-w-[75%] leading-relaxed">
-                      <ReactMarkdown>{item.UserMessageContant}</ReactMarkdown>
-                    </div>
-                    <div className="rounded-full bg-gray-100 border p-1 w-8 h-8 flex items-center justify-center">
-                      <span className="text-black font-bold text-xs">You</span>
-                    </div>
-                  </div>
-                )}
+        <div className="mt-4 max-h-[60vh] space-y-2 overflow-y-auto pr-1">
+          {(days.length ? days : [{ timestamp: todayKey }]).map((d) => (
+            <button
+              key={d.timestamp}
+              type="button"
+              onClick={() => pickDay(d.timestamp)}
+              className={`w-full rounded-xl px-3 py-2 text-left text-sm font-bold ring-1 transition ${
+                selectedDay === d.timestamp
+                  ? "bg-white text-[#070A18] ring-white/30"
+                  : "bg-white/5 text-white/70 ring-white/10 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              {d.timestamp}
+            </button>
+          ))}
+        </div>
+      </GlassCard>
 
-                {/* AI MESSAGE */}
-                {item.AiReplayContant && (
-                  <div className="flex gap-3 my-4 text-gray-700 text-sm">
-                    <div className="rounded-full bg-gray-100 border p-1 w-8 h-8 flex items-center justify-center">
-                      <span className="text-black font-bold text-xs">AI</span>
-                    </div>
-                    <div className="bg-gray-100 px-3 py-2 rounded-lg max-w-[75%] leading-relaxed">
-                      <ReactMarkdown>{item.AiReplayContant}</ReactMarkdown>
+      <GlassCard className="flex min-h-[70vh] flex-col overflow-hidden">
+        <div className="border-b border-white/10 p-4">
+          <div className="text-sm font-black text-white">AI Chat</div>
+          <div className="text-xs text-white/60">
+            Ask anything. Keep it task-focused. Get answers fast.
+          </div>
+        </div>
+
+        <div className="flex-1 space-y-4 overflow-y-auto p-4">
+          {messages.length === 0 ? (
+            <div className="grid h-full place-items-center text-center">
+              <div>
+                <div className="text-2xl font-black">What are we building today?</div>
+                <div className="mt-1 text-sm text-white/60">
+                  Try: “Break down my task into steps.”
+                </div>
+              </div>
+            </div>
+          ) : (
+            messages.map((m, idx) => (
+              <div key={m._id || idx} className="space-y-3">
+                {m.UserMessageContant ? (
+                  <div className="flex justify-end">
+                    <div className="max-w-[85%] rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-[#070A18] shadow-lg shadow-white/10">
+                      <ReactMarkdown>{m.UserMessageContant}</ReactMarkdown>
                     </div>
                   </div>
-                )}
+                ) : null}
+
+                {m.AiReplayContant ? (
+                  <div className="flex justify-start">
+                    <div className="max-w-[85%] rounded-2xl bg-white/5 px-4 py-3 text-sm text-white ring-1 ring-white/10">
+                      <ReactMarkdown>{m.AiReplayContant}</ReactMarkdown>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             ))
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-blue-950 font-bold text-3xl  text-center w-auto">
-                Hello, how can I assist you?
-              </p>
-            </div>
           )}
 
-          {loading && (
-            <div>
-              {UserPointText}
-              <p className="text-gray-400 text-sm italic">Thinking...</p>
-            </div>
-          )}
+          {loading ? (
+            <div className="text-xs font-bold text-white/60">Thinking…</div>
+          ) : null}
           <div ref={bottomRef} />
         </div>
 
-        {/* Input */}
-        <form
-          onSubmit={askAI}
-          className="flex items-center justify-center w-full space-x-2 border-t pt-4"
-        >
-          <input
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            className="flex h-10 w-full rounded-md border border-gray-300 px-3 py-2 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400"
-            placeholder="Type your message"
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="inline-flex items-center justify-center rounded-md text-sm font-medium text-white bg-black hover:bg-gray-800 h-10 px-4 py-2 transition disabled:opacity-50"
-          >
-            Send
-          </button>
+        <form onSubmit={askAI} className="border-t border-white/10 p-4">
+          <div className="flex gap-2">
+            <input
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Type a message…"
+              className="w-full rounded-2xl bg-white/5 px-4 py-3 text-sm font-semibold text-white ring-1 ring-white/10 outline-none placeholder:text-white/40 focus:ring-white/25"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="rounded-2xl bg-white px-4 py-3 text-sm font-black text-[#070A18] ring-1 ring-white/20 disabled:opacity-50"
+            >
+              Send
+            </button>
+          </div>
         </form>
-      </div>
+      </GlassCard>
     </div>
   );
 }
-
-export default AiFeatures;

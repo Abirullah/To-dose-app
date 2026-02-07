@@ -1,7 +1,3 @@
-import React from "react";
-import './Components.css'
-
-
 export default function Loder() {
   return (
     <div className="flex absolute bg-none  items-center justify-center">
@@ -9,4 +5,3 @@ export default function Loder() {
     </div>
   );
 }
-

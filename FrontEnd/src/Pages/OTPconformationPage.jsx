@@ -1,11 +1,12 @@
-import React from 'react'
-import { useLocation } from 'react-router-dom'
-import axios from 'axios'
-import { ToastContainer, toast } from "react-toastify";
+import { useState } from "react";
+import { useLocation, useNavigate } from 'react-router-dom'
+import { toast } from "react-toastify";
+import api from "../lib/api";
 
 function OTPconformationPage() {
     const location = useLocation();
-    const [FormData, setFormData] = React.useState({
+    const navigate = useNavigate();
+    const [FormData, setFormData] = useState({
             email: location.state?.Email || "",
              otp: ""
     })
@@ -16,13 +17,13 @@ function OTPconformationPage() {
         e.preventDefault();
         console.log(FormData);
         try {
-            const response = await axios.post('http://localhost:5000/users/VerifyOTP', {
+            const response = await api.post('/users/VerifyOTP', {
                 ...FormData
             });
             console.log('Server Response:', response.data);
             // here i want to redirect to login page
             toast.success("OTP verified successfully! You can now log in.");
-            window.location.href = "http://localhost:5173/AccountLogin";
+            navigate("/AccountLogin", { replace: true });
         } catch (error) {
             console.error('Error during OTP verification:', error.response ? error.response.data : error.message);
             toast.error(`OTP verification failed: ${error.response ? error.response.data.message : error.message}`);
@@ -60,7 +61,6 @@ function OTPconformationPage() {
                         </button>
                     </form>
                 </div>
-                <ToastContainer />
             </div>
         </div>
     )

@@ -1,115 +1,16 @@
-import React from "react";
-import { useState , useEffect } from "react";
-
-
-function Header() {
-  const [userProfile, setUserProfile] = useState(true);
-  const [userProfileState, setUserProfileState] = useState([]);
-
-
-
-  const GetDishBord = () => {
-    const token = localStorage.getItem("authToken");
-    if (token) {
-      const verifyToken = async () => {
-        try {
-          const response = await fetch(
-            "http://localhost:5000/users/verify-token",
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-          if (response.ok) {
-            window.location.href = "/dishboard";
-            const data = await response.json();
-            console.log("Token is valid:", data);
-
-            window.location.href = "/dishboard";
-          } else {
-            localStorage.removeItem("authToken");
-            localStorage.removeItem("userId");
-            window.location.href = "/AccountLogin";
-          }
-        } catch (error) {
-          console.error("Error verifying token:", error);
-        }
-      };
-
-      const UserData = async () => {
-        const userId = localStorage.getItem("userId");
-        try {
-          const response = await fetch(
-            `http://localhost:5000/users/GetUserProfile/${userId}`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          if (response.ok) {
-            const data = await response.json();
-            setUserProfileState(data.user);
-          } else {
-            console.error("Failed to fetch user profile");
-          }
-        } catch (error) {
-          console.error("Error fetching user profile:", error);
-        }
-
-      };
-
-      UserData();
-
-      verifyToken();
-    } else {
-      window.location.href = "/AccountLogin";
-    }
-  };
-
-  
-
-  return userProfile ? (
-    <div className="bg-white h-20  bg-opacity-10 backdrop-blur-md shadow-md sticky top-0 z-10 ">
-      <div className="container mx-auto px-6  flex justify-between items-center">
-        <div className="text-2xl font-bold text-gray-800 flex items-center space-x-5 sm:ml-2">
-          <img
-            className="w-10 h-10"
-            src="https://img.freepik.com/premium-vector/todo-app-icon_1076610-59732.jpg"
-            alt=""
-          />
-          TaskMaster
-        </div>
-        <nav className="flex space-x-6">
-          <div>
-            <img src="" alt="" className="" />
-            <p className=""></p>
-
+export default function Header() {
+  return (
+    <header className="sticky top-0 z-10 border-b border-white/10 bg-white/5 backdrop-blur-xl">
+      <div className="container mx-auto flex h-16 items-center justify-between px-6">
+        <div className="flex items-center gap-3">
+          <div className="grid h-10 w-10 place-items-center rounded-2xl bg-white/10 ring-1 ring-white/10">
+            <span className="text-sm font-black tracking-tight text-white">TM</span>
           </div>
-        </nav>
-      </div>
-    </div>
-  ) : (
-    <div className="bg-white bg-opacity-10 h-14 backdrop-blur-md shadow-md sticky top-0 z-10 ">
-      <div className="container mx-auto px-6  flex justify-between items-center mt-4">
-        <div className="text-2xl font-bold text-gray-800 flex items-center space-x-5 sm:ml-2">
-          <img
-            className="w-10 h-10"
-            src="https://img.freepik.com/premium-vector/todo-app-icon_1076610-59732.jpg"
-            alt=""
-          />
-          TaskMaster
+          <div className="text-base font-black tracking-tight text-white">
+            TaskMaster
+          </div>
         </div>
-        <nav className="flex space-x-6"></nav>
       </div>
-    </div>
+    </header>
   );
 }
-
-export default Header;

@@ -1,4 +1,3 @@
-import express from "express";
 import AIChatHistory from "../Modells/AI chating history.js";
 import User from "../Modells/UserModle.js";
 import axios from "axios";

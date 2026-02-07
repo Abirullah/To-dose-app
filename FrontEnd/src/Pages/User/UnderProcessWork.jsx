@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { User_Own_Tasks , Update_Task } from "../../APIsRelatedTasks/ApiCaller";
+import { useEffect, useState } from "react";
+import { User_Own_Tasks } from "../../APIsRelatedTasks/ApiCaller";
 import Loader from "../../Components/Loader";
+import TaskDetails from "../../Components/TaskDetails";
 
 function UnderProcessWork() {
   const [underProcessWorks, setUnderProcessWorks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [workDetails, setWorkDetails] = useState(null);
-  const [collectionId, setCollectionId] = useState(null);
 
   const token = localStorage.getItem("authToken");
   const userId = localStorage.getItem("userId");
@@ -17,7 +17,6 @@ function UnderProcessWork() {
       const InProgressTasks = workCollection[0].filter(
         (task) => task.worksStatus === "in-progress"
       );
-      setCollectionId(workCollection[2]);
       if (workCollection[1] === 200) {
         setTimeout(() => {
           setLoading(false);

@@ -4,10 +4,14 @@ import { AiFeature, GetAIChatHistory } from "./AiFeatureRoutes.js";
 import TaskController from "../Controller/TaskController.js";
 
 import { verifyUserLoginStatius } from "../Utils/VerifyUser.js";
+import { requireSelf } from "../MiddleWears/RequireSelf.js";
 
 import multer from "multer";
 
-const upload = multer({ dest: "ToDosApp/" });
+const upload = multer({
+  dest: "uploads/",
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
 
 const UserRouter = express.Router({ mergeParams: true });
 
@@ -20,18 +24,21 @@ UserRouter.post("/Login", UserController.Login);
 UserRouter.get(
   "/GetUserProfile/:userId",
   verifyUserLoginStatius,
+  requireSelf,
   UserController.GetUserProfile
 );
 
 UserRouter.post(
   "/UpdateUserProfile/:userId",
   verifyUserLoginStatius,
+  requireSelf,
   upload.single("file"),
   UserController.UpdateUserProfile
 );
 UserRouter.delete(
   "/DeleteUser/:userId",
   verifyUserLoginStatius,
+  requireSelf,
   UserController.DeleteUser
 );
 
@@ -45,7 +52,12 @@ UserRouter.post("/verify-token", verifyUserLoginStatius, (req, res) => {
 
 // AI Feature route
 
-UserRouter.post("/chat/:userId",verifyUserLoginStatius, AiFeature);
-UserRouter.get("/get-chats/:userId",verifyUserLoginStatius, GetAIChatHistory);
+UserRouter.post("/chat/:userId", verifyUserLoginStatius, requireSelf, AiFeature);
+UserRouter.get(
+  "/get-chats/:userId",
+  verifyUserLoginStatius,
+  requireSelf,
+  GetAIChatHistory
+);
 
 export default UserRouter;

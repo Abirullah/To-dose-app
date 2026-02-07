@@ -1,6 +1,18 @@
 import UserWorksModel from "../Modells/UserWorksModel.js";
 import User from "../Modells/UserModle.js"
 
+const parseDueDate = (value) => {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      const [y, m, d] = trimmed.split("-").map(Number);
+      return new Date(y, m - 1, d, 23, 59, 59, 999);
+    }
+  }
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
 
 const AddTask = async (req, res) => {
   try {
@@ -10,6 +22,14 @@ const AddTask = async (req, res) => {
 
     if (!UserId || !workTitle || !workDescription || !worksComletionTime) {
       return res.status(400).json({ error: "All fields are required" });
+    }
+
+    const dueDate = parseDueDate(worksComletionTime);
+    if (!dueDate) {
+      return res.status(400).json({ error: "Invalid due date/time" });
+    }
+    if (dueDate.getTime() < Date.now()) {
+      return res.status(400).json({ error: "Due date/time cannot be in the past" });
     }
 
     const userDetails = await User.findById(UserId)
@@ -23,7 +43,7 @@ const AddTask = async (req, res) => {
       existingUserTasks.WorkCollection.push({
         workTitle,
         workDescription,
-        worksComletionTime,
+        worksComletionTime: dueDate,
       });
       await existingUserTasks.save();
       return res.status(201).json({ message: "Task added successfully" });
@@ -35,7 +55,7 @@ const AddTask = async (req, res) => {
         {
           workTitle,
           workDescription,
-          worksComletionTime,
+          worksComletionTime: dueDate,
         },
       ],
     });
@@ -58,10 +78,13 @@ const GetTasks = async (req, res) => {
 
 const DeleteTask = async (req, res) => {
   const { TaskId } = req.params;
-  const { UserId } = req.body;
+  const UserId = req.user?._id;
 
   if (!TaskId) {
     return res.status(400).json("Please select a task to delete");
+  }
+  if (!UserId) {
+    return res.status(401).json("Unauthorized");
   }
 
   const userDoc = await UserWorksModel.findOne({
@@ -104,6 +127,18 @@ const UpdateTask = async (req, res) => {
     )
   if (TaskToUpdate.length === 0)
     res.status(404).json("Task not found");
+
+  const dueDate = parseDueDate(worksComletionTime);
+  if (!dueDate) {
+    return res.status(400).json({ error: "Invalid due date/time" });
+  }
+
+  const existingDue = new Date(TaskToUpdate[0].worksComletionTime).getTime();
+  if (dueDate.getTime() < Date.now() && dueDate.getTime() !== existingDue) {
+    return res
+      .status(400)
+      .json({ error: "Due date/time cannot be set in the past" });
+  }
   
 
   const UpdatedUserTasks = await UserWorksModel.findOneAndUpdate(
@@ -115,7 +150,7 @@ const UpdateTask = async (req, res) => {
       $set: {
         "WorkCollection.$.workTitle": workTitle,
         "WorkCollection.$.workDescription": workDescription,
-        "WorkCollection.$.worksComletionTime": worksComletionTime,
+        "WorkCollection.$.worksComletionTime": dueDate,
         "WorkCollection.$.worksStatus": worksStatus,
       },
     },

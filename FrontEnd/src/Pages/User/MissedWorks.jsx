@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { User_Own_Tasks } from "../../APIsRelatedTasks/ApiCaller";
 import Loader from "../../Components/Loader";
 import TaskDetails from "../../Components/TaskDetails";

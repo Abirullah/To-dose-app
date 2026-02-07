@@ -1,17 +1,17 @@
 import express from "express";
 import { config } from "dotenv";
 import jwt from 'jsonwebtoken'
-const app = express();
 import UserModel from "../Modells/UserModle.js";
 import nodemailar from "nodemailer";
 import bcrypt from "bcrypt";
 import  uploadToCloudinary  from "../Utils/Cloudnary.js";
-import UserWorksModel from "../Modells/UserWorksModel.js";
 
+
+const app = express();
 
 config();
 
-const JWT_SECRET_kEY = process.env.JWT_SECRET;
+const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN
 
 
@@ -19,7 +19,7 @@ const generateToken = (user) => {
   //  console.log("USER PASSED TO TOKEN:", user)
   return jwt.sign(
     { id: user._id, email: user.email, name: user.name },
-    JWT_SECRET_kEY,
+    JWT_SECRET_KEY,
     { expiresIn: JWT_EXPIRES_IN }
   );
 };
@@ -31,7 +31,7 @@ const Register = async (req, res) => {
   const { name, email, password, conformPassword } = req.body;
 
   if (!name || !email || !password || !conformPassword) {
-    return res.status(400).json({ message: "All fields are required" });
+    return res.status(400).json({ message:"All fields are required", password:password, conformPassword:conformPassword , name:name , email:email });
   }
 
   if (password !== conformPassword) {
@@ -74,7 +74,7 @@ const Register = async (req, res) => {
     email,
     password: hashedPassword,
     otp: OTP,
-    otpExpiresAt: Date.now() + 1000 * 60 * 60 * 24, // 10 min expiry
+    otpExpiresAt: Date.now() + 1000 * 60 * 60 * 24, 
   });
 
   return res
@@ -136,7 +136,7 @@ const Login = async (req, res) => {
       .json({ message: "Please verify your email before logging in" });
   }
 
-  console.log("User Durning Logining : " + user)
+  console.log("User Durning Logining : " + user) 
 
    const token = generateToken(user[0]);
 

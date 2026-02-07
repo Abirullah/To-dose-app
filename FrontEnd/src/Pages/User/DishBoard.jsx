@@ -20,7 +20,6 @@ const CurrentPageKey = localStorage.getItem("CurrentPage") || "todo";
 function UserDishBoard() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [selected, setSelected] = useState(CurrentPageKey);
-  const [userProfile, setUserProfile] = useState([]);
  
 
   const navigate = useNavigate();
@@ -33,30 +32,6 @@ function UserDishBoard() {
     const token = localStorage.getItem("authToken");
     if (!token) {
       navigate("/AccountLogin");
-    } else {
-      
-      const userId = localStorage.getItem("userId");
-      fetch(`http://localhost:5000/users/GetUserProfile/${userId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((res) => {
-          if (res.status === 401) {
-            localStorage.removeItem("authToken");
-            localStorage.removeItem("userId");
-            navigate("/AccountLogin");
-          }
-          return res.json(res.error);
-        })
-        .then((data) => {
-          setUserProfile(data.user);
-        })
-        .catch((error) => {
-          console.error("Error fetching user profile:", error);
-        });
     }
   }, [navigate]);
 

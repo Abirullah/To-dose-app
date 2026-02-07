@@ -1,8 +1,7 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import api from "../lib/api";
 
 
 export default function Login() {
@@ -11,7 +10,6 @@ export default function Login() {
     password: "",
   });
   const [loading, setLoading] = useState(false);
-  const [loginUser , setloginUser] = useState(null);
    
   const navigate = useNavigate();
   const handleChange = (e) => {
@@ -22,18 +20,17 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-     const response= await axios.post("http://localhost:5000/users/Login", formData);
+     const response= await api.post("/users/Login", formData);
       toast.success("Login successful!");
-      setloginUser(true);
       setLoading(false);
-      
-      navigate("/dishboard")
       
       const { token } = response.data
       const { user } = response.data;
-      
+
       localStorage.setItem("authToken", token);
       localStorage.setItem("userId", user[0]._id);
+      
+      navigate("/dishboard")
 
     } catch (error) {
       if (
@@ -42,10 +39,10 @@ export default function Login() {
       ) {
         toast.info("Please verify your email before logging in. Redirecting...")
         setTimeout(() => {
-          navigate("/OTPConformation", { state: { Email: formData.email } });
+          navigate("/OTPconformation", { state: { Email: formData.email } });
         }, 3000);
         setLoading(false);
-        return;
+        return; 
       }
       toast.error(`Login failed: ${error.response ? error.response.data.message : error.message} `);
       setLoading(false);
@@ -86,10 +83,9 @@ export default function Login() {
           </form>
           <p className="text-center mt-4">
              Don't have an account?
-            <a className="text-blue-700" href="http://localhost:5173/AccountRegistration"> Register</a>
+            <Link className="text-blue-700" to="/AccountRegistration"> Register</Link>
         </p>
       </div>
-      <ToastContainer />
       </div>
       
       

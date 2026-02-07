@@ -1,11 +1,10 @@
-import React from 'react'
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Pages.css'
 import '../Styles/AllComponents.css'
  import AOS from "aos";
 import "aos/dist/aos.css";
-import Header from "../Components/Header";
+import api from "../lib/api";
 
 function HomePage() {
   const navigate = useNavigate();
@@ -20,22 +19,9 @@ function HomePage() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/users/verify-token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`, // Send as Bearer token
-        },
-      });
-
-      if (response.ok) {
-        console.log(response);
-        navigate("/dishboard");
-      } else {
-        console.log(response);
-        navigate("/AccountLogin");
-      }
-    } catch (err) {
+      await api.post("/users/verify-token");
+      navigate("/dishboard");
+    } catch {
       navigate("/AccountLogin");
     }
   };

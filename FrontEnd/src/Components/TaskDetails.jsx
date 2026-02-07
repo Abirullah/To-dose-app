@@ -1,6 +1,5 @@
 import DropDown from "./DropDown";
 import { useState } from "react";
-import { Update_Task , Delete_Task } from "../APIsRelatedTasks/ApiCaller";
 
 function TaskDetails({ workDetails, setWorkDetails }) {
     const [DropDownStatus, setDropDownStatus] = useState(false);

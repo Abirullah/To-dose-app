@@ -11,10 +11,14 @@ cloudinary.config({
 });
 
 
-const uploadToCloudinary = async (filePath) => {
+const uploadToCloudinary = async (
+  filePath,
+  { folder = "ToDosApp", resource_type = "auto" } = {}
+) => {
   try {
     const result = await cloudinary.uploader.upload(filePath, {
-      folder: "ToDosApp/", 
+      folder,
+      resource_type,
     });
 
     fs.unlinkSync(filePath);
@@ -22,7 +26,11 @@ const uploadToCloudinary = async (filePath) => {
     return result.secure_url;
   } catch (error) {
     console.error("Cloudinary upload error:", error);
-    fs.unlinkSync(filePath);
+    try {
+      fs.unlinkSync(filePath);
+    } catch {
+      // ignore
+    }
     throw error;
   }
 };
