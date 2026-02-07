@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../lib/api";
+import AuthShell from "../Components/AuthShell";
 
 
 export default function Login() {
@@ -50,46 +51,55 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-50 to-cyan-50 font-sans p-4">
-      <div className="w-full max-w-sm sm:max-w-md">
-        <div className="bg-white p-8 sm:p-12 rounded-2xl shadow-2xl">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6 text-center">Login</h1>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl"
-            />
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl"
-            />
-            <button
-              type="submit"
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl"
-              disabled={loading}
-            >
-              {loading ? "Logging in..." : "Login"}
-            </button>
-          </form>
-          <p className="text-center mt-4">
-             Don't have an account?
-            <Link className="text-blue-700" to="/AccountRegistration"> Register</Link>
+    <AuthShell
+      title="Welcome back"
+      subtitle="Login to manage private work, team tasks, and submissions."
+    >
+      <form onSubmit={handleSubmit} className="space-y-3">
+        <div>
+          <label className="text-xs font-bold text-white/60">Email</label>
+          <input
+            type="email"
+            name="email"
+            placeholder="you@email.com"
+            value={formData.email}
+            onChange={handleChange}
+            required
+            className="mt-1 w-full rounded-2xl bg-white/5 px-4 py-3 text-sm font-semibold text-white ring-1 ring-white/10 outline-none placeholder:text-white/40 focus:ring-white/25"
+            autoComplete="email"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs font-bold text-white/60">Password</label>
+          <input
+            type="password"
+            name="password"
+            placeholder="Your password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            className="mt-1 w-full rounded-2xl bg-white/5 px-4 py-3 text-sm font-semibold text-white ring-1 ring-white/10 outline-none placeholder:text-white/40 focus:ring-white/25"
+            autoComplete="current-password"
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="w-full rounded-2xl bg-white px-4 py-3 text-sm font-black text-[#070A18] shadow-lg shadow-white/10 ring-1 ring-white/20 transition hover:-translate-y-0.5 disabled:opacity-60"
+          disabled={loading}
+        >
+          {loading ? "Logging in..." : "Login"}
+        </button>
+
+        <p className="pt-2 text-center text-sm text-white/60">
+          Don’t have an account?{" "}
+          <Link className="font-black text-white hover:underline" to="/AccountRegistration">
+            Register
+          </Link>
         </p>
-      </div>
-      </div>
-      
-      
-    </div>
+      </form>
+    </AuthShell>
 
 
   );

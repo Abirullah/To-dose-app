@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from "react-toastify";
 import api from "../lib/api";
+import AuthShell from "../Components/AuthShell";
 
 function OTPconformationPage() {
     const location = useLocation();
@@ -32,37 +33,44 @@ function OTPconformationPage() {
 
 
     return (
-            <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-r from-blue-50 to-cyan-50 font-sans p-4">
-            <div className="relative w-full max-w-sm sm:max-w-md">
-                {/* A well-defined card for the OTP form */}
-                <div className="bg-white p-8 sm:p-12 rounded-2xl shadow-2xl transition-all duration-700 ease-in-out transform scale-100 opacity-100">
-                    <div className="text-center mb-6">
-                        <p className="text-lg text-gray-600 mb-2">We have sent an OTP to</p>
-                        <h1 className="text-xl sm:text-2xl font-bold text-gray-800 break-words">
-                            
-                            {FormData.email}
-                        </h1>
-                    </div>
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        <input
-                            type="text"
-                            placeholder="Enter OTP"
-                            name="otp"
-                            value={FormData.otp}
-                            onChange={handleChange}
-                            required
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 outline-none transition-all duration-200 text-center text-lg tracking-widest font-mono"
-                        />
-                        <button
-                            type="submit"
-                            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-colors duration-300 transform hover:scale-105"
-                        >
-                            Submit
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
+      <AuthShell
+        title="Confirm OTP"
+        subtitle={`We sent a code to ${FormData.email || "your email"}.`}
+      >
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div>
+            <label className="text-xs font-bold text-white/60">OTP</label>
+            <input
+              type="text"
+              placeholder="Enter OTP"
+              name="otp"
+              value={FormData.otp}
+              onChange={handleChange}
+              required
+              className="mt-1 w-full rounded-2xl bg-white/5 px-4 py-3 text-center font-mono text-lg font-black tracking-[0.35em] text-white ring-1 ring-white/10 outline-none placeholder:text-white/30 focus:ring-white/25"
+              inputMode="numeric"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full rounded-2xl bg-white px-4 py-3 text-sm font-black text-[#070A18] shadow-lg shadow-white/10 ring-1 ring-white/20 transition hover:-translate-y-0.5"
+          >
+            Verify OTP
+          </button>
+
+          <p className="pt-2 text-center text-sm text-white/60">
+            Back to{" "}
+            <button
+              type="button"
+              onClick={() => navigate("/AccountLogin")}
+              className="font-black text-white hover:underline"
+            >
+              Login
+            </button>
+          </p>
+        </form>
+      </AuthShell>
     )
 }
 
