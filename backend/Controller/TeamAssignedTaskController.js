@@ -75,12 +75,29 @@ export const createTeamTask = async (req, res) => {
         .json({ error: "User is not a member of this team" });
     }
 
+    let taskFileUrl = "";
+    if (req.file) {
+      if (req.file.mimetype !== "application/pdf") {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch {
+          // ignore
+        }
+        return res.status(400).json({ error: "Only PDF uploads are allowed" });
+      }
+      taskFileUrl = await uploadToCloudinary(req.file.path, {
+        folder: "ToDosApp/team-task-files",
+        resource_type: "raw",
+      });
+    }
+
     const task = await TeamAssignedTask.create({
       team: team._id,
       createdBy: req.user._id,
       assignedTo: assignedUser._id,
       title: String(title).trim(),
       description: String(description ?? "").trim(),
+      taskFileUrl,
       deadline: deadlineCheck.date,
     });
 
@@ -171,7 +188,10 @@ export const submitTask = async (req, res) => {
         }
         return res.status(400).json({ error: "Only PDF uploads are allowed" });
       }
-      fileUrl = await uploadToCloudinary(req.file.path);
+      fileUrl = await uploadToCloudinary(req.file.path, {
+        folder: "ToDosApp/submissions",
+        resource_type: "raw",
+      });
     }
 
     if (!submissionText && !fileUrl) {
@@ -249,6 +269,21 @@ export const updateTaskByOwner = async (req, res) => {
           .json({ error: "User is not a member of this team" });
       }
       task.assignedTo = assignedUser._id;
+    }
+
+    if (req.file) {
+      if (req.file.mimetype !== "application/pdf") {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch {
+          // ignore
+        }
+        return res.status(400).json({ error: "Only PDF uploads are allowed" });
+      }
+      task.taskFileUrl = await uploadToCloudinary(req.file.path, {
+        folder: "ToDosApp/team-task-files",
+        resource_type: "raw",
+      });
     }
 
     await task.save();

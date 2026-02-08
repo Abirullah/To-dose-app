@@ -39,6 +39,10 @@ const TeamAssignedTaskSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    taskFileUrl: {
+      type: String,
+      default: "",
+    },
     deadline: {
       type: Date,
       required: true,
@@ -64,4 +68,3 @@ const TeamAssignedTaskModel = mongoose.model(
 );
 
 export default TeamAssignedTaskModel;
-

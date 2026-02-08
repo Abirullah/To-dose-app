@@ -20,6 +20,7 @@ const TeamAssignedTaskRoutes = express.Router({ mergeParams: true });
 TeamAssignedTaskRoutes.post(
   "/team/:teamId",
   verifyUserLoginStatius,
+  upload.single("file"),
   createTeamTask
 );
 TeamAssignedTaskRoutes.get(
@@ -43,6 +44,7 @@ TeamAssignedTaskRoutes.post(
 TeamAssignedTaskRoutes.patch(
   "/:taskId",
   verifyUserLoginStatius,
+  upload.single("file"),
   updateTaskByOwner
 );
 
@@ -53,4 +55,3 @@ TeamAssignedTaskRoutes.delete(
 );
 
 export default TeamAssignedTaskRoutes;
-

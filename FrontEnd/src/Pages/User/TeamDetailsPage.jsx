@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../lib/api";
 
@@ -27,6 +27,7 @@ const Chip = ({ children, tone = "default" }) => {
 
 export default function TeamDetailsPage() {
   const { teamId } = useParams();
+  const navigate = useNavigate();
   const userId = localStorage.getItem("userId");
 
   const [loading, setLoading] = useState(true);
@@ -40,6 +41,7 @@ export default function TeamDetailsPage() {
     deadline: "",
     assignedToUserId: "",
   });
+  const [taskPdf, setTaskPdf] = useState(null);
 
   const isOwner = useMemo(() => {
     return team?.owner?._id?.toString() === userId?.toString();
@@ -91,9 +93,19 @@ export default function TeamDetailsPage() {
   const createTask = async (e) => {
     e.preventDefault();
     try {
-      await api.post(`/team-tasks/team/${teamId}`, taskForm);
+      const form = new FormData();
+      form.append("title", taskForm.title);
+      form.append("description", taskForm.description);
+      form.append("deadline", taskForm.deadline);
+      form.append("assignedToUserId", taskForm.assignedToUserId);
+      if (taskPdf) form.append("file", taskPdf);
+
+      await api.post(`/team-tasks/team/${teamId}`, form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       toast.success("Task assigned");
       setTaskForm({ title: "", description: "", deadline: "", assignedToUserId: "" });
+      setTaskPdf(null);
       await load();
     } catch (e2) {
       toast.error(e2?.response?.data?.error || "Failed to create task");
@@ -107,6 +119,21 @@ export default function TeamDetailsPage() {
       await load();
     } catch (e) {
       toast.error(e?.response?.data?.error || "Delete failed");
+    }
+  };
+
+  const deleteTeam = async () => {
+    const ok = window.confirm(
+      "Delete this team? This will remove the team and all its assigned tasks."
+    );
+    if (!ok) return;
+
+    try {
+      await api.delete(`/teams/${teamId}`);
+      toast.success("Team deleted");
+      navigate("/dishboard/teams", { replace: true });
+    } catch (e) {
+      toast.error(e?.response?.data?.error || "Failed to delete team");
     }
   };
 
@@ -133,6 +160,15 @@ export default function TeamDetailsPage() {
           >
             Assigned Tasks →
           </Link>
+          {isOwner ? (
+            <button
+              type="button"
+              onClick={deleteTeam}
+              className="rounded-2xl bg-rose-500/15 px-4 py-2.5 text-sm font-black text-rose-100 ring-1 ring-rose-500/30 hover:bg-rose-500/20"
+            >
+              Delete Team
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -296,6 +332,21 @@ export default function TeamDetailsPage() {
             />
 
             <div className="md:col-span-2">
+              <label className="text-xs font-bold text-white/60">
+                Task PDF (optional)
+              </label>
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={(e) => setTaskPdf(e.target.files?.[0] || null)}
+                className="mt-1 w-full rounded-2xl bg-white/5 px-4 py-3 text-sm font-semibold text-white ring-1 ring-white/10 file:mr-4 file:rounded-xl file:border-0 file:bg-white file:px-3 file:py-2 file:text-xs file:font-black file:text-[#070A18]"
+              />
+              <div className="mt-1 text-xs text-white/40">
+                Upload a PDF brief/instructions for the member.
+              </div>
+            </div>
+
+            <div className="md:col-span-2">
               <label className="text-xs font-bold text-white/60">Deadline</label>
               <input
                 type="datetime-local"
@@ -351,22 +402,32 @@ export default function TeamDetailsPage() {
                     <div className="min-w-0">
                       <div className="truncate text-base font-black">{t.title}</div>
                       <div className="mt-1 text-sm text-white/60">{t.description}</div>
-                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-white/60">
-                        <span>
-                          <span className="font-bold">Assigned:</span>{" "}
-                          {t.assignedTo?.name || t.assignedTo?.email || "—"}
-                        </span>
-                        <span>•</span>
-                        <span>
-                          <span className="font-bold">Deadline:</span>{" "}
-                          {new Date(t.deadline).toLocaleString()}
-                        </span>
-                      </div>
-                      {t.submission?.text || t.submission?.fileUrl ? (
-                        <div className="mt-3 rounded-2xl bg-black/20 p-3 ring-1 ring-white/10">
-                          <div className="text-xs font-black text-white/70">
-                            Submission
-                          </div>
+	                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-white/60">
+	                        <span>
+	                          <span className="font-bold">Assigned:</span>{" "}
+	                          {t.assignedTo?.name || t.assignedTo?.email || "—"}
+	                        </span>
+	                        <span>•</span>
+	                        <span>
+	                          <span className="font-bold">Deadline:</span>{" "}
+	                          {new Date(t.deadline).toLocaleString()}
+	                        </span>
+	                      </div>
+	                      {t.taskFileUrl ? (
+	                        <a
+	                          href={t.taskFileUrl}
+	                          target="_blank"
+	                          rel="noreferrer"
+	                          className="mt-3 inline-flex rounded-xl bg-white/10 px-3 py-2 text-xs font-black text-white ring-1 ring-white/10 hover:bg-white/15"
+	                        >
+	                          Open Task PDF
+	                        </a>
+	                      ) : null}
+	                      {t.submission?.text || t.submission?.fileUrl ? (
+	                        <div className="mt-3 rounded-2xl bg-black/20 p-3 ring-1 ring-white/10">
+	                          <div className="text-xs font-black text-white/70">
+	                            Submission
+	                          </div>
                           {t.submission?.text ? (
                             <div className="mt-1 whitespace-pre-wrap text-sm text-white/80">
                               {t.submission.text}

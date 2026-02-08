@@ -11,6 +11,7 @@ import MyTeamsPage from "./Pages/User/MyTeamsPage";
 import TeamDetailsPage from "./Pages/User/TeamDetailsPage";
 import FindTeamsPage from "./Pages/User/FindTeamsPage";
 import AiChatPage from "./Pages/User/AiChatPage";
+import ProfilePage from "./Pages/User/ProfilePage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -39,6 +40,7 @@ function App() {
           <Route path="teams/:teamId" element={<TeamDetailsPage />} />
           <Route path="find-teams" element={<FindTeamsPage />} />
           <Route path="ai" element={<AiChatPage />} />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
       </Routes>
     </Router>

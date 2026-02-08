@@ -1,6 +1,7 @@
 import Team from "../Modells/TeamModel.js";
 import User from "../Modells/UserModle.js";
 import { makeSlug } from "../Utils/slug.js";
+import TeamAssignedTask from "../Modells/TeamAssignedTaskModel.js";
 
 const escapeRegex = (value) =>
   String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -264,6 +265,26 @@ export const decideJoinRequest = async (req, res) => {
     await team.save();
 
     return res.status(200).json({ message: "Request updated" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+export const deleteTeam = async (req, res) => {
+  try {
+    const teamId = req.params.teamId;
+
+    const team = await Team.findById(teamId);
+    if (!team) return res.status(404).json({ error: "Team not found" });
+
+    if (team.owner.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: "Only the owner can delete this team" });
+    }
+
+    await TeamAssignedTask.deleteMany({ team: teamId });
+    await Team.deleteOne({ _id: teamId });
+
+    return res.status(200).json({ message: "Team deleted" });
   } catch (error) {
     return res.status(500).json({ error: error.message });
   }

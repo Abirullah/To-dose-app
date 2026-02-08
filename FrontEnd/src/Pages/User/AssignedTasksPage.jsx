@@ -113,22 +113,27 @@ export default function AssignedTasksPage() {
                   <div className="min-w-0">
                     <div className="truncate text-base font-black">{t.title}</div>
                     <div className="mt-1 text-sm text-white/60">{t.description}</div>
-                    <div className="mt-3 flex flex-wrap gap-2 text-xs text-white/60">
-                      <span>
-                        <span className="font-bold">Team:</span> {t.team?.name || "—"}
-                      </span>
-                      <span>•</span>
-                      <span>
-                        <span className="font-bold">Owner:</span>{" "}
-                        {t.team?.owner?.name || t.team?.owner?.email || "—"}
-                      </span>
-                      <span>•</span>
-                      <span>
-                        <span className="font-bold">Deadline:</span>{" "}
-                        {new Date(t.deadline).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
+	                    <div className="mt-3 flex flex-wrap gap-2 text-xs text-white/60">
+	                      <span>
+	                        <span className="font-bold">Team:</span> {t.team?.name || "—"}
+	                      </span>
+	                      <span>•</span>
+	                      <span>
+	                        <span className="font-bold">Owner:</span>{" "}
+	                        {t.team?.owner?.name || t.team?.owner?.email || "—"}
+	                      </span>
+	                      <span>•</span>
+	                      <span>
+	                        <span className="font-bold">Deadline:</span>{" "}
+	                        {new Date(t.deadline).toLocaleString()}
+	                      </span>
+	                    </div>
+	                    {t.taskFileUrl ? (
+	                      <div className="mt-2 text-xs font-black text-cyan-200">
+	                        Task PDF attached
+	                      </div>
+	                    ) : null}
+	                  </div>
 
                   <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end">
                     <Chip tone={statusTone(t.status)}>{t.status}</Chip>
@@ -168,15 +173,25 @@ export default function AssignedTasksPage() {
               </button>
             </div>
 
-            <div className="mt-5 grid gap-3 md:grid-cols-3">
-              <div className="md:col-span-2">
-                <GlassCard className="p-4">
-                  <div className="text-xs font-bold text-white/60">Task Details</div>
-                  <div className="mt-2 whitespace-pre-wrap text-sm text-white/80">
-                    {selected.description}
-                  </div>
-                </GlassCard>
-              </div>
+	            <div className="mt-5 grid gap-3 md:grid-cols-3">
+	              <div className="md:col-span-2">
+	                <GlassCard className="p-4">
+	                  <div className="text-xs font-bold text-white/60">Task Details</div>
+	                  <div className="mt-2 whitespace-pre-wrap text-sm text-white/80">
+	                    {selected.description}
+	                  </div>
+	                  {selected.taskFileUrl ? (
+	                    <a
+	                      href={selected.taskFileUrl}
+	                      target="_blank"
+	                      rel="noreferrer"
+	                      className="mt-3 inline-flex rounded-xl bg-white/10 px-3 py-2 text-xs font-black text-white ring-1 ring-white/10 hover:bg-white/15"
+	                    >
+	                      Open Task PDF
+	                    </a>
+	                  ) : null}
+	                </GlassCard>
+	              </div>
               <div className="space-y-3">
                 <GlassCard className="p-4">
                   <div className="text-xs font-bold text-white/60">Status</div>
@@ -233,4 +248,3 @@ export default function AssignedTasksPage() {
     </div>
   );
 }
-

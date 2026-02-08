@@ -35,6 +35,13 @@ UserRouter.post(
   upload.single("file"),
   UserController.UpdateUserProfile
 );
+
+UserRouter.post(
+  "/UpdatePassword/:userId",
+  verifyUserLoginStatius,
+  requireSelf,
+  UserController.UpdatePassword
+);
 UserRouter.delete(
   "/DeleteUser/:userId",
   verifyUserLoginStatius,

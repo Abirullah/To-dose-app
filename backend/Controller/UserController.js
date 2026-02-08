@@ -5,6 +5,7 @@ import UserModel from "../Modells/UserModle.js";
 import nodemailar from "nodemailer";
 import bcrypt from "bcrypt";
 import  uploadToCloudinary  from "../Utils/Cloudnary.js";
+import fs from "fs";
 
 
 const app = express();
@@ -146,7 +147,7 @@ const Login = async (req, res) => {
 
 const UpdateUserProfile = async (req, res) => {
   const { userId } = req.params;
-  const { name, email } = req.body;
+  const { name } = req.body;
 
   try {
    
@@ -158,12 +159,22 @@ const UpdateUserProfile = async (req, res) => {
   
     let avatarUrl = user.avatarUrl;
     if (req.file) {
-      avatarUrl = await uploadToCloudinary(req.file.path);
+      if (!req.file.mimetype?.startsWith("image/")) {
+        try {
+          fs.unlinkSync(req.file.path);
+        } catch {
+          // ignore
+        }
+        return res.status(400).json({ message: "Avatar must be an image" });
+      }
+      avatarUrl = await uploadToCloudinary(req.file.path, {
+        folder: "ToDosApp/avatars",
+        resource_type: "image",
+      });
     }
 
   
     user.name = name || user.name;
-    user.email = email || user.email;
     user.avatarUrl = avatarUrl;
 
     await user.save();
@@ -174,11 +185,51 @@ const UpdateUserProfile = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating profile:", error);
+    if (error?.code === 11000) {
+      return res.status(409).json({ message: "Email already in use" });
+    }
     res.status(500).json({ message: error.message });
   }
 };
 
 
+
+const UpdatePassword = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { currentPassword, newPassword, confirmNewPassword } = req.body;
+
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
+
+    if (String(newPassword).length < 6) {
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 6 characters" });
+    }
+
+    const user = await UserModel.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const ok = await bcrypt.compare(currentPassword, user.password);
+    if (!ok) {
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    return res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 const GetUserProfile = async (req, res) => {
   const { userId } = req.params;
@@ -217,6 +268,7 @@ export default {
   Login,
   VerifyOTP,
   UpdateUserProfile,
+  UpdatePassword,
   GetUserProfile,
   DeleteUser,
 };

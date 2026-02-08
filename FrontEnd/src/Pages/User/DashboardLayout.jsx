@@ -53,6 +53,7 @@ export default function DashboardLayout() {
       { to: "teams", label: "My Teams", icon: <Icon path="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H2v-2a4 4 0 014-4h1m10-4a4 4 0 10-8 0 4 4 0 008 0z" /> },
       { to: "find-teams", label: "Find Teams", icon: <Icon path="M21 21l-4.35-4.35M10 18a8 8 0 100-16 8 8 0 000 16z" /> },
       { to: "ai", label: "AI Chat", icon: <Icon path="M12 20l9-5-9-5-9 5 9 5zM12 12V4" /> },
+      { to: "profile", label: "Profile", icon: <Icon path="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z" /> },
     ],
     []
   );
@@ -156,6 +157,12 @@ export default function DashboardLayout() {
                 </div>
               </div>
             </div>
+            <NavLink
+              to="profile"
+              className="mt-4 block w-full rounded-xl bg-white/5 px-3 py-2 text-center text-sm font-semibold text-white/80 ring-1 ring-white/10 transition hover:bg-white/10 hover:text-white"
+            >
+              Edit Profile
+            </NavLink>
             <button
               type="button"
               onClick={logout}
@@ -196,4 +203,3 @@ export default function DashboardLayout() {
     </div>
   );
 }
-
