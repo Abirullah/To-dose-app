@@ -34,12 +34,6 @@ app.use((err, req, res, next) => {
   return res.status(status).json({ error: err.message });
 });
 
-// app.listen(PORT, () => {
-//   console.log(`Server is running on http://localhost:${PORT}`);
-// });
-
-app.get("/", (req, res) => {
-  res.send("API is running");
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
-
-export default app;

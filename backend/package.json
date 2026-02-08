@@ -6,9 +6,13 @@
   "author": "",
   "type": "module",
   "main": "index.js",
+  "engines": {
+    "node": "18.x"
+  },
   "scripts": {
-    "test": "npm run dev",
-    "dev": "nodemon index.js"
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "axios": "^1.13.1",
@@ -24,6 +28,6 @@
     "openai": "^6.6.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11" 
+    "nodemon": "^3.1.11"
   }
 }
