@@ -18,7 +18,7 @@ fs.mkdirSync(uploadDir, { recursive: true });
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://abirafriditaskmaster.vercel.app",
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     credentials: true,
   })
