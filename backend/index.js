@@ -11,7 +11,7 @@ console.log("wowow", process.env.MONGOOSE_URL);
 DbConnection();
 const app = express();
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 
 const uploadDir = path.join(process.cwd(), "uploads");
 fs.mkdirSync(uploadDir, { recursive: true });

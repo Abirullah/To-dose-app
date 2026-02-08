@@ -1,6 +1,11 @@
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "https://abirtaskmaster.up.railway.app").replace(
+  /\/+$/,
+  ""
+);
+
 export async function User_Own_Tasks(userId, token) {
   try {
-    const res = await fetch(`http://localhost:5000/tasks/GetTasks/${userId}`, {
+    const res = await fetch(`${API_BASE_URL}/tasks/GetTasks/${userId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -38,7 +43,7 @@ export async function User_Own_Tasks(userId, token) {
 export async function Update_Task(userId, taskDetails, token) {
   try {
     const res = await fetch(
-      `http://localhost:5000/tasks/UpdateTask/${userId}`,
+      `${API_BASE_URL}/tasks/UpdateTask/${userId}`,
       {
         method: "PUT",
         headers: {
@@ -60,7 +65,7 @@ export async function Delete_Task(UserId, TaskId, token) {
   try {
     console.log("deleting task id:", TaskId);
     const res = await fetch(
-      `http://localhost:5000/tasks/DeleteTask/${TaskId}`,
+      `${API_BASE_URL}/tasks/DeleteTask/${TaskId}`,
       {
         method: "DELETE",
         headers: {
@@ -77,5 +82,4 @@ export async function Delete_Task(UserId, TaskId, token) {
     return null;
   }
 }
-
 
