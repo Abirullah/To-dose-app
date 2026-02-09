@@ -9,7 +9,9 @@ config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
-const HOST = process.env.HOST || "0.0.0.0";
+const HOST = process.env.HOST;
+const shouldBindToHost =
+  HOST && !["localhost", "127.0.0.1", "::1"].includes(HOST);
 
 process.on("unhandledRejection", (reason) => {
   console.error("UNHANDLED_REJECTION:", reason);
@@ -22,6 +24,27 @@ process.on("uncaughtException", (err) => {
 });
 
 /* ---------- MIDDLEWARE ---------- */
+
+app.use((req, res, next) => {
+  const start = Date.now();
+  console.log(`--> ${req.method} ${req.originalUrl}`);
+  res.on("finish", () => {
+    console.log(
+      `<-- ${req.method} ${req.originalUrl} ${res.statusCode} ${
+        Date.now() - start
+      }ms`
+    );
+  });
+  next();
+});
+
+// Health check (keep this BEFORE other middleware to debug edge/proxy issues)
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+    db: mongoose.connection.readyState,
+  });
+});
 
 const defaultAllowedOrigins = [
   "https://abirafriditaskmaster.vercel.app",
@@ -49,7 +72,7 @@ app.use(
   })
 );
 
-// Body parsers
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -57,13 +80,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
   res.status(200).send("API is running 🚀");
-});
-
-app.get("/health", (req, res) => {
-  res.status(200).json({
-    status: "ok",
-    db: mongoose.connection.readyState, // 0=disconnected, 1=connected, 2=connecting, 3=disconnecting
-  });
 });
 
 const requireDbConnection = (req, res, next) => {
@@ -74,7 +90,7 @@ const requireDbConnection = (req, res, next) => {
   });
 };
 
-// Your main routes
+
 app.use("/", requireDbConnection, Routers);
 
 /* ---------- ERROR HANDLER ---------- */
@@ -105,8 +121,18 @@ const connectDbWithRetry = async (attempt = 1) => {
   }
 };
 
-app.listen(PORT, HOST, () => {
-  console.log(`Server running on http://${HOST}:${PORT}`);
+const server = shouldBindToHost ? app.listen(PORT, HOST) : app.listen(PORT);
+server.on("error", (err) => {
+  console.error("SERVER_ERROR:", err);
+  process.exit(1);
+});
+server.on("listening", () => {
+  const addr = server.address();
+  if (typeof addr === "string") {
+    console.log(`Server running on ${addr}`);
+    return;
+  }
+  console.log(`Server running on http://${addr.address}:${addr.port}`);
 });
 
 connectDbWithRetry();
