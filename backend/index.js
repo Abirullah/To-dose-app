@@ -9,6 +9,17 @@ config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
+const HOST = process.env.HOST || "0.0.0.0";
+
+process.on("unhandledRejection", (reason) => {
+  console.error("UNHANDLED_REJECTION:", reason);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("UNCAUGHT_EXCEPTION:", err);
+  // Let Railway restart the process
+  process.exit(1);
+});
 
 /* ---------- MIDDLEWARE ---------- */
 
@@ -94,8 +105,8 @@ const connectDbWithRetry = async (attempt = 1) => {
   }
 };
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(PORT, HOST, () => {
+  console.log(`Server running on http://${HOST}:${PORT}`);
 });
 
 connectDbWithRetry();
