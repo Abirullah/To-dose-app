@@ -29,58 +29,91 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const Register = async (req, res) => {
-  const { name, email, password, conformPassword } = req.body;
+  try {
+    const { name, email, password, conformPassword } = req.body;
 
-  if (!name || !email || !password || !conformPassword) {
-    return res.status(400).json({ message:"All fields are required", password:password, conformPassword:conformPassword , name:name , email:email });
-  }
+    if (!name || !email || !password || !conformPassword) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
 
-  if (password !== conformPassword) {
-    return res.status(400).json({ message: "Passwords do not match" });
-  }
+    if (password !== conformPassword) {
+      return res.status(400).json({ message: "Passwords do not match" });
+    }
 
-  const existingUser = await UserModel.findOne({ email });
-  if (existingUser) {
+    const existingUser = await UserModel.findOne({ email });
+    if (existingUser) {
+      return res
+        .status(409)
+        .json({ message: "User with this email already exists" });
+    }
+
+    const emailUser = process.env.EMAIL_SERVICE;
+    const emailPass = process.env.APP_PASSWORD;
+    if (!emailUser || !emailPass) {
+      return res.status(500).json({
+        message:
+          "Email service is not configured on the server (EMAIL_SERVICE / APP_PASSWORD).",
+      });
+    }
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Generate OTP
+    const OTP = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Save OTP and temp user data in DB (or cache like Redis)
+    const createdUser = await UserModel.create({
+      name,
+      email,
+      password: hashedPassword,
+      otp: OTP,
+      otpExpiresAt: Date.now() + 1000 * 60 * 60 * 24,
+    });
+
+    // Send OTP via email (with timeouts so Railway won't 502)
+    const transporter = nodemailar.createTransport({
+      service: "gmail",
+      auth: {
+        user: emailUser,
+        pass: emailPass,
+      },
+      connectionTimeout: 8_000,
+      greetingTimeout: 8_000,
+      socketTimeout: 8_000,
+    });
+
+    try {
+      await Promise.race([
+        transporter.sendMail({
+          from: emailUser,
+          to: email,
+          subject: "OTP Verification",
+          html: `<h3>Your OTP is: <b>${OTP}</b></h3>`,
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Email send timeout")), 8_000)
+        ),
+      ]);
+    } catch (mailError) {
+      try {
+        await UserModel.deleteOne({ _id: createdUser._id });
+      } catch {
+        // ignore cleanup errors
+      }
+      throw mailError;
+    }
+
     return res
-      .status(409)
-      .json({ message: "User with this email already exists" });
+      .status(200)
+      .json({ message: "OTP sent to email verify it in 24 hours" });
+  } catch (error) {
+    console.error("Register error:", error);
+    return res
+      .status(500)
+      .json({ message: error?.message || "Server error" });
   }
-
-  // Hash password
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
-
-  // Generate OTP
-  const OTP = Math.floor(100000 + Math.random() * 900000).toString();
-
-  // Send OTP via email
-  const transporter = nodemailar.createTransport({
-    service: "gmail",
-    auth: {
-      user: process.env.EMAIL_SERVICE,
-      pass: process.env.APP_PASSWORD,
-    },
-  });
-
-  await transporter.sendMail({
-    from: process.env.EMAIL_SERVICE,
-    to: email,
-    subject: "OTP Verification",
-    html: `<h3>Your OTP is: <b>${OTP}</b></h3>`,
-  });
-
-  // Save OTP and temp user data in DB (or cache like Redis)
-  await UserModel.create({
-    name,
-    email,
-    password: hashedPassword,
-    otp: OTP,
-    otpExpiresAt: Date.now() + 1000 * 60 * 60 * 24, 
-  });
-
-  return res
-    .status(200)
-    .json({ message: "OTP sent to email verify it in 24 hours" });
 };
 
 const VerifyOTP = async (req, res) => {

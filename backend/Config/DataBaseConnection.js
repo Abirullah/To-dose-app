@@ -1,11 +1,16 @@
 import mongoose from "mongoose";
 
 const DbConnection = async () => {
-    try {
-        await mongoose.connect(process.env.MONGOOSE_URL);
-        console.log("Database connected");
-    } catch (error) {
-        console.log("Database connection error:", error.massage);
-    }
-}
+  const uri = process.env.MONGOOSE_URL;
+  if (!uri) {
+    throw new Error("MONGOOSE_URL is not set");
+  }
+
+  await mongoose.connect(uri, {
+    serverSelectionTimeoutMS: 10_000,
+    connectTimeoutMS: 10_000,
+  });
+
+  return mongoose.connection;
+};
 export default DbConnection;
