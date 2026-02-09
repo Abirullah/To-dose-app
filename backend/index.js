@@ -9,9 +9,10 @@ config();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
-const HOST = process.env.HOST;
-const shouldBindToHost =
-  HOST && !["localhost", "127.0.0.1", "::1"].includes(HOST);
+const HOST = process.env.HOST || "0.0.0.0";
+const bindHost = ["localhost", "127.0.0.1", "::1"].includes(HOST)
+  ? "0.0.0.0"
+  : HOST;
 
 process.on("unhandledRejection", (reason) => {
   console.error("UNHANDLED_REJECTION:", reason);
@@ -121,7 +122,7 @@ const connectDbWithRetry = async (attempt = 1) => {
   }
 };
 
-const server = shouldBindToHost ? app.listen(PORT, HOST) : app.listen(PORT);
+const server = app.listen(PORT, bindHost);
 server.on("error", (err) => {
   console.error("SERVER_ERROR:", err);
   process.exit(1);
