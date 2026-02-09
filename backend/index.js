@@ -1,39 +1,59 @@
 import express from "express";
+import cors from "cors";
 import { config } from "dotenv";
 import DbConnection from "./Config/DataBaseConnection.js";
 import Routers from "./Routes/Index.js";
-import cors from "cors";
-import fs from "fs";
-import path from "path";
 
 config();
-console.log("wowow", process.env.MONGOOSE_URL);
-DbConnection();
-const app = express();
 
+const app = express();
 const PORT = process.env.PORT || 3000;
 
-const uploadDir = path.join(process.cwd(), "uploads");
-fs.mkdirSync(uploadDir, { recursive: true });
+/* ---------- MIDDLEWARE ---------- */
 
-app.use(
-  cors({
-    origin: "https://abirafriditaskmaster.vercel.app",
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    credentials: true,
-  })
-);
+// TEMP: allow all origins to avoid CORS 502
+app.use(cors());
+
+// Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+/* ---------- ROUTES ---------- */
+
+// Health check (IMPORTANT for Railway)
+app.get("/", (req, res) => {
+  res.status(200).send("API is running 🚀");
+});
+
+// Your main routes
 app.use("/", Routers);
 
+/* ---------- ERROR HANDLER ---------- */
+
 app.use((err, req, res, next) => {
-  if (!err) return next();
-  const status = err.name === "MulterError" ? 400 : 400;
-  return res.status(status).json({ error: err.message });
+  console.error("ERROR:", err);
+  res.status(400).json({
+    success: false,
+    message: err.message || "Something went wrong",
+  });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+/* ---------- SERVER START ---------- */
+
+const startServer = async () => {
+  try {
+    console.log("Connecting to database...");
+    await DbConnection();
+    console.log("Database connected ✅");
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server ❌");
+    console.error(error.message);
+    process.exit(1);
+  }
+};
+
+startServer();
