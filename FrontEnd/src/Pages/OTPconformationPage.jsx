@@ -19,7 +19,7 @@ function OTPconformationPage() {
         console.log(FormData);
         try {
             const response = await api.post('/users/VerifyOTP', {
-                ...FormData
+                ...FormDatadelete my project
             });
             console.log('Server Response:', response.data);
             // here i want to redirect to login page
