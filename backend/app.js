@@ -57,7 +57,8 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+// Express 5 + path-to-regexp: "*" is an invalid path pattern (wildcards must be named)
+app.options("/{*path}", cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -95,4 +96,3 @@ app.use((err, req, res, next) => {
 });
 
 export default app;
-

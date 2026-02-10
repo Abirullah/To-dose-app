@@ -2,10 +2,10 @@ import express from "express";
 import { config } from "dotenv";
 import jwt from 'jsonwebtoken'
 import UserModel from "../Modells/UserModle.js";
-import nodemailar from "nodemailer";
 import bcrypt from "bcrypt";
 import  uploadToCloudinary  from "../Utils/Cloudnary.js";
 import fs from "fs";
+import { assertEmailSenderConfigured, sendEmail } from "../Utils/sendEmail.js";
 
 
 const app = express();
@@ -47,12 +47,11 @@ const Register = async (req, res) => {
         .json({ message: "User with this email already exists" });
     }
 
-    const emailUser = process.env.EMAIL_SERVICE;
-    const emailPass = process.env.APP_PASSWORD;
-    if (!emailUser || !emailPass) {
+    try {
+      assertEmailSenderConfigured();
+    } catch (err) {
       return res.status(500).json({
-        message:
-          "Email service is not configured on the server (EMAIL_SERVICE / APP_PASSWORD).",
+        message: err?.message || "Email service is not configured on the server.",
       });
     }
 
@@ -72,30 +71,13 @@ const Register = async (req, res) => {
       otpExpiresAt: Date.now() + 1000 * 60 * 60 * 24,
     });
 
-    // Send OTP via email (with timeouts so Railway won't 502)
-    const transporter = nodemailar.createTransport({
-      service: "gmail",
-      auth: {
-        user: emailUser,
-        pass: emailPass,
-      },
-      connectionTimeout: 8_000,
-      greetingTimeout: 8_000,
-      socketTimeout: 8_000,
-    });
-
     try {
-      await Promise.race([
-        transporter.sendMail({
-          from: emailUser,
-          to: email,
-          subject: "OTP Verification",
-          html: `<h3>Your OTP is: <b>${OTP}</b></h3>`,
-        }),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Email send timeout")), 8_000)
-        ),
-      ]);
+      await sendEmail({
+        to: email,
+        subject: "OTP Verification",
+        html: `<h3>Your OTP is: <b>${OTP}</b></h3>`,
+        timeoutMs: 8_000,
+      });
     } catch (mailError) {
       try {
         await UserModel.deleteOne({ _id: createdUser._id });
