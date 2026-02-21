@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from "react-toastify";
 import api from "../lib/api";
@@ -7,20 +7,27 @@ import AuthShell from "../Components/AuthShell";
 function OTPconformationPage() {
     const location = useLocation();
     const navigate = useNavigate();
+    const lastAutoSubmittedOtpRef = useRef("");
+    const [verifying, setVerifying] = useState(false);
     const [FormData, setFormData] = useState({
             email: location.state?.Email || "",
              otp: ""
     })
     const handleChange = (e) =>{
-        setFormData({ ...FormData, [e.target.name]: e.target.value });
+        const nextValue =
+          e.target.name === "otp"
+            ? String(e.target.value || "").replace(/\D/g, "").slice(0, 6)
+            : e.target.value;
+        setFormData({ ...FormData, [e.target.name]: nextValue });
     }
-    const handleSubmit = async (e) =>{
-        e.preventDefault();
-        console.log(FormData);
+
+    const verifyOtp = async (otp) => {
+        if (!FormData.email || !otp || otp.length < 6 || verifying) return;
+        setVerifying(true);
         try {
             const response = await api.post('/users/VerifyOTP', {
                 email: FormData.email,
-                otp: FormData.otp
+                otp
             });
             console.log('Server Response:', response.data);
             // here i want to redirect to login page
@@ -29,8 +36,23 @@ function OTPconformationPage() {
         } catch (error) {
             console.error('Error during OTP verification:', error.response ? error.response.data : error.message);
             toast.error(`OTP verification failed: ${error.response ? error.response.data.message : error.message}`);
+        } finally {
+            setVerifying(false);
         }
     }
+
+    const handleSubmit = async (e) =>{
+        e.preventDefault();
+        await verifyOtp(FormData.otp);
+    }
+
+    useEffect(() => {
+      if (!FormData.email || FormData.otp.length !== 6 || verifying) return;
+      if (lastAutoSubmittedOtpRef.current === FormData.otp) return;
+      lastAutoSubmittedOtpRef.current = FormData.otp;
+      verifyOtp(FormData.otp);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [FormData.otp, FormData.email, verifying]);
 
 
     return (
@@ -53,12 +75,13 @@ function OTPconformationPage() {
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full rounded-2xl bg-white px-4 py-3 text-sm font-black text-[#070A18] shadow-lg shadow-white/10 ring-1 ring-white/20 transition hover:-translate-y-0.5"
-          >
-            Verify OTP
-          </button>
+	          <button
+	            type="submit"
+                disabled={verifying || FormData.otp.length < 6}
+	            className="w-full rounded-2xl bg-white px-4 py-3 text-sm font-black text-[#070A18] shadow-lg shadow-white/10 ring-1 ring-white/20 transition hover:-translate-y-0.5"
+	          >
+	            {verifying ? "Verifying..." : "Verify OTP"}
+	          </button>
 
           <p className="pt-2 text-center text-sm text-white/60">
             Back to{" "}

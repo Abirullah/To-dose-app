@@ -1,6 +1,12 @@
 import { NavLink, Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import api from "../../lib/api";
+import {
+  clearAuthSession,
+  getAuthRemainingMs,
+  getAuthToken,
+  getUserId,
+} from "../../lib/authSession";
 
 const NavItem = ({ to, label, icon }) => (
   <NavLink
@@ -43,8 +49,13 @@ export default function DashboardLayout() {
   const [profile, setProfile] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
 
-  const token = localStorage.getItem("authToken");
-  const userId = localStorage.getItem("userId");
+  const token = getAuthToken();
+  const userId = getUserId();
+
+  const logout = () => {
+    clearAuthSession();
+    navigate("/AccountLogin", { replace: true });
+  };
 
   const navItems = useMemo(
     () => [
@@ -78,15 +89,26 @@ export default function DashboardLayout() {
     };
   }, [token, userId]);
 
+  useEffect(() => {
+    if (!token || !userId) return;
+    const ms = getAuthRemainingMs();
+    if (!ms) {
+      logout();
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      logout();
+    }, ms + 200);
+
+    return () => clearTimeout(timer);
+    // logout uses navigate; this should be reset when token/session changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, userId]);
+
   if (!token || !userId) {
     return <Navigate to="/AccountLogin" replace state={{ from: location.pathname }} />;
   }
-
-  const logout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userId");
-    navigate("/AccountLogin", { replace: true });
-  };
 
   return (
     <div className="min-h-screen bg-[#070A18] text-white">

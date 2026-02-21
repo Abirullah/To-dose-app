@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../lib/api";
+import { getAuthToken } from "../lib/authSession";
 
 const FeatureCard = ({ title, desc }) => (
   <div className="rounded-3xl bg-white/5 p-6 ring-1 ring-white/10 backdrop-blur-xl">
@@ -14,7 +15,7 @@ export default function HomePage() {
   const [checking, setChecking] = useState(false);
 
   const openDashboard = async () => {
-    const authToken = localStorage.getItem("authToken");
+    const authToken = getAuthToken();
     if (!authToken) {
       navigate("/AccountLogin");
       return;
@@ -162,4 +163,3 @@ export default function HomePage() {
     </div>
   );
 }
-

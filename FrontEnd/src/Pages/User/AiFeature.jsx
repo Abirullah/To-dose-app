@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import api from "../../lib/api";
+import { getUserId } from "../../lib/authSession";
 
 const GlassCard = ({ children, className = "" }) => (
   <div className={`rounded-2xl bg-white/5 ring-1 ring-white/10 backdrop-blur-xl ${className}`}>
@@ -25,7 +26,7 @@ const clamp = (value, max = 70) => {
 };
 
 export default function AiFeatures() {
-  const userId = localStorage.getItem("userId");
+  const userId = getUserId();
 
   const bottomRef = useRef(null);
   const [loading, setLoading] = useState(false);

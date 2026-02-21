@@ -47,6 +47,49 @@ const JoinRequestSchema = new mongoose.Schema(
   { _id: true }
 );
 
+const InvitationSchema = new mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    invitedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    token: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    status: {
+      type: String,
+      enum: ["pending", "accepted", "expired", "revoked"],
+      default: "pending",
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+    expiresAt: {
+      type: Date,
+      required: true,
+    },
+    respondedAt: {
+      type: Date,
+    },
+  },
+  { _id: true }
+);
+
 const TeamSchema = new mongoose.Schema(
   {
     name: {
@@ -75,6 +118,10 @@ const TeamSchema = new mongoose.Schema(
       type: [JoinRequestSchema],
       default: [],
     },
+    invitations: {
+      type: [InvitationSchema],
+      default: [],
+    },
   },
   { timestamps: true }
 );
@@ -84,4 +131,3 @@ TeamSchema.index({ name: "text", slug: "text" });
 const TeamModel = mongoose.model("Team", TeamSchema);
 
 export default TeamModel;
-

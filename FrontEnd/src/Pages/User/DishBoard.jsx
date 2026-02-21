@@ -6,6 +6,7 @@ import UnderProcessWork from "./UnderProcessWork";
 import PendingWorks from "./PendingWorks";
 import CompletedWorks from "./CompletedWorks";
 import MissedWorks from "./MissedWorks";
+import { getAuthToken } from "../../lib/authSession";
 
 
 const menuItems = [
@@ -29,7 +30,7 @@ function UserDishBoard() {
 
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
+    const token = getAuthToken();
     if (!token) {
       navigate("/AccountLogin");
     }

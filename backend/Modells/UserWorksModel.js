@@ -22,7 +22,10 @@ const WorkDetails = new mongoose.Schema({
             type: String,
             enum: ['pending', 'in-progress', 'completed', 'missed'],
             default: 'pending'
-    }
+    },
+        deadlineReminderSentAt: {
+            type: Date
+        }
 });
 
 const UserWorksSchema = new mongoose.Schema(

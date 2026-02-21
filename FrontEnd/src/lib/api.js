@@ -1,11 +1,12 @@
 import axios from "axios";
+import { clearAuthSession, getAuthToken } from "./authSession";
 
 const api = axios.create({
   baseURL: (import.meta.env.VITE_API_URL || "https://to-dose-app-2ct7.vercel.app").replace(/\/+$/, ""),
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("authToken");
+  const token = getAuthToken();
   if (token) {
     config.headers = config.headers ?? {};
     config.headers.Authorization = `Bearer ${token}`;
@@ -18,8 +19,7 @@ api.interceptors.response.use(
   (error) => {
     const status = error?.response?.status;
     if (status === 401) {
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("userId");
+      clearAuthSession();
       if (window.location.pathname !== "/AccountLogin") {
         window.location.href = "/AccountLogin";
       }

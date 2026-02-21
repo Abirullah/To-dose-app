@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../lib/api";
+import { getUserId } from "../../lib/authSession";
 
 const GlassCard = ({ children, className = "" }) => (
   <div
@@ -11,7 +12,7 @@ const GlassCard = ({ children, className = "" }) => (
 );
 
 export default function ProfilePage() {
-  const userId = localStorage.getItem("userId");
+  const userId = getUserId();
 
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
@@ -213,4 +214,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-

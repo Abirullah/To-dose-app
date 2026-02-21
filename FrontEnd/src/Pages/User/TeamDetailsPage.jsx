@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../../lib/api";
+import { getUserId } from "../../lib/authSession";
 
 const GlassCard = ({ children, className = "" }) => (
   <div className={`rounded-2xl bg-white/5 p-5 ring-1 ring-white/10 backdrop-blur-xl ${className}`}>
@@ -28,7 +29,8 @@ const Chip = ({ children, tone = "default" }) => {
 export default function TeamDetailsPage() {
   const { teamId } = useParams();
   const navigate = useNavigate();
-  const userId = localStorage.getItem("userId");
+  const location = useLocation();
+  const userId = getUserId();
 
   const [loading, setLoading] = useState(true);
   const [team, setTeam] = useState(null);
@@ -68,11 +70,24 @@ export default function TeamDetailsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teamId]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const inviteStatus = params.get("invite");
+    if (!inviteStatus) return;
+    if (inviteStatus === "accepted") {
+      toast.success("Invitation accepted successfully");
+      return;
+    }
+    if (inviteStatus === "failed") {
+      toast.error("Invitation link is invalid or expired");
+    }
+  }, [location.search]);
+
   const addMember = async (e) => {
     e.preventDefault();
     try {
       await api.post(`/teams/${teamId}/members`, { email: newMemberEmail });
-      toast.success("Member added");
+      toast.success("Invitation sent");
       setNewMemberEmail("");
       await load();
     } catch (e2) {

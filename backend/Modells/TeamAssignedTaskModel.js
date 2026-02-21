@@ -54,6 +54,9 @@ const TeamAssignedTaskSchema = new mongoose.Schema(
       default: "assigned",
       index: true,
     },
+    deadlineReminderSentAt: {
+      type: Date,
+    },
     submission: {
       type: SubmissionSchema,
       default: () => ({}),

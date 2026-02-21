@@ -1,6 +1,7 @@
 import express from "express";
 import { verifyUserLoginStatius } from "../Utils/VerifyUser.js";
 import {
+  acceptTeamInvitationByToken,
   addMemberByEmail,
   createTeam,
   deleteTeam,
@@ -16,6 +17,7 @@ const TeamRoutes = express.Router({ mergeParams: true });
 TeamRoutes.post("/", verifyUserLoginStatius, createTeam);
 TeamRoutes.get("/mine", verifyUserLoginStatius, getMyTeams);
 TeamRoutes.get("/search", verifyUserLoginStatius, searchTeams);
+TeamRoutes.get("/invitations/accept", acceptTeamInvitationByToken);
 TeamRoutes.get("/:teamId", verifyUserLoginStatius, getTeamDetails);
 TeamRoutes.delete("/:teamId", verifyUserLoginStatius, deleteTeam);
 

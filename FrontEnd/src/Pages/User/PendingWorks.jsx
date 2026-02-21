@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 import { User_Own_Tasks } from "../../APIsRelatedTasks/ApiCaller";
 import Loader from "../../Components/Loader";
 import TaskDetails from "../../Components/TaskDetails";
+import { getAuthToken, getUserId } from "../../lib/authSession";
 
 function PendingWorks() {
   const [underProcessWorks, setUnderProcessWorks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [workDetails, setWorkDetails] = useState(null);
 
-  const token = localStorage.getItem("authToken");
-  const userId = localStorage.getItem("userId");
+  const token = getAuthToken();
+  const userId = getUserId();
   useEffect(() => {
     const getTasks = async () => {
       try {

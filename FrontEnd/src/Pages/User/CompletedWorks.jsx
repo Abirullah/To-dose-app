@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 import { User_Own_Tasks } from "../../APIsRelatedTasks/ApiCaller";
 import Loader from "../../Components/Loader";
 import TaskDetails from "../../Components/TaskDetails";
+import {
+  clearAuthSession,
+  getAuthToken,
+  getUserId,
+} from "../../lib/authSession";
 
 function CompletedWorks() {
   const [underProcessWorks, setUnderProcessWorks] = useState([]);
@@ -9,8 +14,8 @@ function CompletedWorks() {
   const [workDetails, setWorkDetails] = useState(null);
 
 
-  const token = localStorage.getItem("authToken");
-  const userId = localStorage.getItem("userId");
+  const token = getAuthToken();
+  const userId = getUserId();
 
 
   useEffect(() => {
@@ -25,8 +30,7 @@ function CompletedWorks() {
         }, 1000);
       }
       else if(workCollection[1]===401){
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("userId");
+        clearAuthSession();
         window.location.href = "/AccountLogin";
       }
 

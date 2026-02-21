@@ -1,8 +1,9 @@
 import { Delete_Task } from "../APIsRelatedTasks/ApiCaller";
+import { getAuthToken, getUserId } from "../lib/authSession";
 
 function DropDown({ Edit, Delete, MarkAsCompleted, workDetails }) {
-    const token = localStorage.getItem("authToken");
-    const userId = localStorage.getItem("userId");
+    const token = getAuthToken();
+    const userId = getUserId();
 
     const DeleteTheTask = (userId, TaskId, token) => async () => {
         const Response = await Delete_Task(userId, TaskId, token);

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import api from "../../lib/api";
+import { getUserId } from "../../lib/authSession";
 
 const SectionTitle = ({ title, subtitle }) => (
   <div className="mb-6">
@@ -41,7 +42,7 @@ const toLocalInputValue = (dateValue) => {
 };
 
 export default function PrivateTasksPage() {
-  const userId = localStorage.getItem("userId");
+  const userId = getUserId();
 
   const [loading, setLoading] = useState(true);
   const [collectionId, setCollectionId] = useState(null);
@@ -458,4 +459,3 @@ export default function PrivateTasksPage() {
     </div>
   );
 }
-

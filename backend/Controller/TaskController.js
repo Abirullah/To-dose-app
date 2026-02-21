@@ -1,5 +1,6 @@
 import UserWorksModel from "../Modells/UserWorksModel.js";
 import User from "../Modells/UserModle.js"
+import { sendEmail } from "../Utils/sendEmail.js";
 
 const parseDueDate = (value) => {
   if (typeof value === "string") {
@@ -11,6 +12,82 @@ const parseDueDate = (value) => {
   }
   const parsed = new Date(value);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const getTodayRange = () => {
+  const now = new Date();
+  const start = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    0,
+    0,
+    0,
+    0
+  );
+  const end = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    23,
+    59,
+    59,
+    999
+  );
+  return { start, end };
+};
+
+const sendDueTodayReminderForPrivateTasks = async (taskDoc) => {
+  if (!taskDoc) return;
+  const { start, end } = getTodayRange();
+
+  const dueTodayPending = taskDoc.WorkCollection.filter((task) => {
+    if (!task?.worksComletionTime) return false;
+    if (task.worksStatus === "completed") return false;
+    const dueDate = new Date(task.worksComletionTime);
+    if (Number.isNaN(dueDate.getTime())) return false;
+    if (dueDate.getTime() < start.getTime() || dueDate.getTime() > end.getTime()) {
+      return false;
+    }
+
+    if (!task.deadlineReminderSentAt) return true;
+    const sentAt = new Date(task.deadlineReminderSentAt);
+    if (Number.isNaN(sentAt.getTime())) return true;
+    return sentAt.getTime() < start.getTime() || sentAt.getTime() > end.getTime();
+  });
+
+  if (!dueTodayPending.length) return;
+
+  const owner = await User.findById(taskDoc.userId).select("name email");
+  if (!owner?.email) return;
+
+  const items = dueTodayPending
+    .map(
+      (task) =>
+        `<li><b>${task.workTitle}</b> - due ${new Date(
+          task.worksComletionTime
+        ).toLocaleString()}</li>`
+    )
+    .join("");
+
+  await sendEmail({
+    to: owner.email,
+    subject: "Reminder: You have task deadlines today",
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+        <h3>Hello ${owner.name || "there"},</h3>
+        <p>The following tasks are due today and not completed yet:</p>
+        <ul>${items}</ul>
+        <p>Please complete them before the day ends.</p>
+      </div>
+    `,
+  });
+
+  const now = new Date();
+  for (const task of dueTodayPending) {
+    task.deadlineReminderSentAt = now;
+  }
+  await taskDoc.save();
 };
 
 
@@ -72,6 +149,12 @@ const GetTasks = async (req, res) => {
   if(!UserId) res.status(401).json("Unauthorized")
 
   const UserAllTasks = await UserWorksModel.find({ userId: UserId })
+
+  if (UserAllTasks[0]) {
+    sendDueTodayReminderForPrivateTasks(UserAllTasks[0]).catch((error) => {
+      console.error("Private deadline reminder failed:", error.message);
+    });
+  }
   
   res.json(UserAllTasks)
 }
@@ -134,6 +217,7 @@ const UpdateTask = async (req, res) => {
   }
 
   const existingDue = new Date(TaskToUpdate[0].worksComletionTime).getTime();
+  const dueDateChanged = dueDate.getTime() !== existingDue;
   if (dueDate.getTime() < Date.now() && dueDate.getTime() !== existingDue) {
     return res
       .status(400)
@@ -152,6 +236,9 @@ const UpdateTask = async (req, res) => {
         "WorkCollection.$.workDescription": workDescription,
         "WorkCollection.$.worksComletionTime": dueDate,
         "WorkCollection.$.worksStatus": worksStatus,
+        ...(dueDateChanged
+          ? { "WorkCollection.$.deadlineReminderSentAt": null }
+          : {}),
       },
     },
     { new: true } // return updated document

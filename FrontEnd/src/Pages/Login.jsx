@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "../lib/api";
 import AuthShell from "../Components/AuthShell";
+import { storeAuthSession } from "../lib/authSession";
 
 
 export default function Login() {
@@ -28,8 +29,7 @@ export default function Login() {
       const { token } = response.data
       const { user } = response.data;
 
-      localStorage.setItem("authToken", token);
-      localStorage.setItem("userId", user[0]._id);
+      storeAuthSession({ token, userId: user[0]._id });
       
       navigate("/dishboard")
 

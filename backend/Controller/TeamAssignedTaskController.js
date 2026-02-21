@@ -3,6 +3,7 @@ import User from "../Modells/UserModle.js";
 import TeamAssignedTask from "../Modells/TeamAssignedTaskModel.js";
 import uploadToCloudinary from "../Utils/Cloudnary.js";
 import fs from "fs";
+import { sendEmail } from "../Utils/sendEmail.js";
 
 const toDate = (value) => {
   if (typeof value === "string") {
@@ -22,6 +23,80 @@ const requireFutureDate = (value, label) => {
   if (d.getTime() <= Date.now())
     return { ok: false, error: `${label} must be in the future` };
   return { ok: true, date: d };
+};
+
+const getTodayRange = () => {
+  const now = new Date();
+  const start = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    0,
+    0,
+    0,
+    0
+  );
+  const end = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    23,
+    59,
+    59,
+    999
+  );
+  return { start, end };
+};
+
+const sendDueTodayReminderForAssignedTasks = async (userId, teamId = null) => {
+  const { start, end } = getTodayRange();
+
+  const query = {
+    assignedTo: userId,
+    status: { $in: ["assigned", "submitted"] },
+    deadline: { $gte: start, $lte: end },
+    $or: [
+      { deadlineReminderSentAt: { $exists: false } },
+      { deadlineReminderSentAt: null },
+      { deadlineReminderSentAt: { $lt: start } },
+      { deadlineReminderSentAt: { $gt: end } },
+    ],
+  };
+
+  if (teamId) query.team = teamId;
+
+  const tasks = await TeamAssignedTask.find(query).populate("team", "name");
+  if (!tasks.length) return;
+
+  const user = await User.findById(userId).select("name email");
+  if (!user?.email) return;
+
+  const items = tasks
+    .map(
+      (task) =>
+        `<li><b>${task.title}</b> (${task.team?.name || "Team task"}) - due ${new Date(
+          task.deadline
+        ).toLocaleString()}</li>`
+    )
+    .join("");
+
+  await sendEmail({
+    to: user.email,
+    subject: "Reminder: Team task deadlines today",
+    html: `
+      <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+        <h3>Hello ${user.name || "there"},</h3>
+        <p>You have team tasks due today and not completed yet:</p>
+        <ul>${items}</ul>
+        <p>Please submit or complete them today.</p>
+      </div>
+    `,
+  });
+
+  await TeamAssignedTask.updateMany(
+    { _id: { $in: tasks.map((task) => task._id) } },
+    { $set: { deadlineReminderSentAt: new Date() } }
+  );
 };
 
 export const createTeamTask = async (req, res) => {
@@ -134,6 +209,12 @@ export const listTeamTasks = async (req, res) => {
       .populate("createdBy", "name email avatarUrl")
       .sort({ createdAt: -1 });
 
+    if (!isOwner) {
+      sendDueTodayReminderForAssignedTasks(req.user._id, teamId).catch((error) => {
+        console.error("Team task reminder failed:", error.message);
+      });
+    }
+
     return res.status(200).json({ tasks });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -157,6 +238,10 @@ export const listAssignedToMe = async (req, res) => {
       })
       .populate("createdBy", "name email avatarUrl")
       .sort({ createdAt: -1 });
+
+    sendDueTodayReminderForAssignedTasks(userId).catch((error) => {
+      console.error("Assigned task reminder failed:", error.message);
+    });
 
     return res.status(200).json({ tasks });
   } catch (error) {
@@ -246,6 +331,7 @@ export const updateTaskByOwner = async (req, res) => {
         return res.status(400).json({ error: deadlineCheck.error });
       }
       task.deadline = deadlineCheck.date;
+      task.deadlineReminderSentAt = undefined;
       if (task.status === "missed") task.status = "assigned";
     }
 
