@@ -72,16 +72,11 @@ const Register = async (req, res) => {
     });
 
     try {
-      const mailResult = await sendEmail({
+      await sendEmail({
         to: email,
         subject: "OTP Verification",
         html: `<h3>Your OTP is: <b>${OTP}</b></h3>`,
         timeoutMs: 8_000,
-      });
-
-      return res.status(200).json({
-        message: "OTP sent to email verify it in 24 hours",
-        ...(mailResult?.provider === "console" ? { devOtp: OTP } : {}),
       });
     } catch (mailError) {
       try {
@@ -91,6 +86,10 @@ const Register = async (req, res) => {
       }
       throw mailError;
     }
+
+    return res
+      .status(200)
+      .json({ message: "OTP sent to email verify it in 24 hours" });
   } catch (error) {
     console.error("Register error:", error);
     return res
@@ -186,7 +185,6 @@ const UpdateUserProfile = async (req, res) => {
       avatarUrl = await uploadToCloudinary(req.file.path, {
         folder: "ToDosApp/avatars",
         resource_type: "image",
-        originalName: req.file.originalname,
       });
     }
 

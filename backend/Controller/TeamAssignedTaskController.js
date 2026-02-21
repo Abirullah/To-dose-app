@@ -88,7 +88,6 @@ export const createTeamTask = async (req, res) => {
       taskFileUrl = await uploadToCloudinary(req.file.path, {
         folder: "ToDosApp/team-task-files",
         resource_type: "raw",
-        originalName: req.file.originalname,
       });
     }
 
@@ -192,7 +191,6 @@ export const submitTask = async (req, res) => {
       fileUrl = await uploadToCloudinary(req.file.path, {
         folder: "ToDosApp/submissions",
         resource_type: "raw",
-        originalName: req.file.originalname,
       });
     }
 
@@ -285,7 +283,6 @@ export const updateTaskByOwner = async (req, res) => {
       task.taskFileUrl = await uploadToCloudinary(req.file.path, {
         folder: "ToDosApp/team-task-files",
         resource_type: "raw",
-        originalName: req.file.originalname,
       });
     }
 

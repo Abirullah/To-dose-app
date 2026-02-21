@@ -5,10 +5,7 @@
     "node": "18.x"
   },
   "scripts": {
-    "postinstall": "npm --prefix backend install && npm --prefix FrontEnd install",
-    "start": "npm --prefix backend start",
-    "dev": "npm run dev:backend & npm run dev:frontend",
-    "dev:backend": "npm --prefix backend run dev",
-    "dev:frontend": "npm --prefix FrontEnd run dev"
+    "postinstall": "npm --prefix backend install",
+    "start": "npm --prefix backend start"
   }
 }

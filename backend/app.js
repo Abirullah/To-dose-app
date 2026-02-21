@@ -2,14 +2,10 @@ import express from "express";
 import cors from "cors";
 import { config } from "dotenv";
 import mongoose from "mongoose";
-import path from "path";
-import { fileURLToPath } from "url";
 import DbConnection from "./Config/DataBaseConnection.js";
 import Routers from "./Routes/RoutesIndex.js";
 
 config();
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -37,6 +33,7 @@ app.get("/health", (req, res) => {
 });
 
 const defaultAllowedOrigins = [
+  "https://abirafriditaskmaster.vercel.app",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "http://localhost:3000",
@@ -55,6 +52,9 @@ const corsOptions = {
   origin: (origin, callback) => {
     // allow non-browser clients (curl, server-to-server)
     if (!origin || allowAllOrigins) return callback(null, true);
+    if (/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin)) {
+      return callback(null, true);
+    }
     if (allowedOrigins.includes(origin)) return callback(null, true);
     return callback(new Error("Not allowed by CORS"));
   },
@@ -67,7 +67,6 @@ app.options("/{*path}", cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 /* ---------- ROUTES ---------- */
 

@@ -3,9 +3,10 @@ import mongoose from "mongoose";
 let connectPromise = null;
 
 const DbConnection = async () => {
-  const uri =
-    (process.env.MONGOOSE_URL || "").trim() ||
-    "mongodb://127.0.0.1:27017/todose_local";
+  const uri = process.env.MONGOOSE_URL;
+  if (!uri) {
+    throw new Error("MONGOOSE_URL is not set");
+  }
 
   if (mongoose.connection.readyState === 1) {
     return mongoose.connection;
