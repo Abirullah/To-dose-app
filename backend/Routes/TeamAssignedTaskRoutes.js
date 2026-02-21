@@ -1,5 +1,7 @@
 import express from "express";
 import multer from "multer";
+import os from "os";
+import path from "path";
 import { verifyUserLoginStatius } from "../Utils/VerifyUser.js";
 import {
   createTeamTask,
@@ -10,7 +12,7 @@ import {
   updateTaskByOwner,
 } from "../Controller/TeamAssignedTaskController.js";
 
-const uploadDir = process.env.VERCEL ? "/tmp/uploads" : "uploads/";
+const uploadDir = path.join(os.tmpdir(), "uploads");
 
 const upload = multer({
   dest: uploadDir,
