@@ -277,7 +277,11 @@ export const TaskSubmission = async (req, res) => {
     let submittedTaskUrl;
    
     if (req.file) {
-      submittedTaskUrl = await uploadToCloudinary(req.file.path)
+      submittedTaskUrl = await uploadToCloudinary(req.file.path, {
+        folder: "ToDosApp/team-task-submissions",
+        resource_type: "raw",
+        originalName: req.file.originalname,
+      });
     }
 
     
@@ -299,7 +303,6 @@ export const TaskSubmission = async (req, res) => {
   
 }
   
-
 
 
 

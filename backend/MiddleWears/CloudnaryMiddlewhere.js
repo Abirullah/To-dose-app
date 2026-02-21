@@ -1,30 +1,22 @@
-import express from "express";
-import { v2 as cloudinary } from "cloudinary";
-import { config } from "dotenv";
+import uploadToCloudinary from "../Utils/Cloudnary.js";
 
-config();
-
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
 const CloudinaryMiddlewear = async (req, res, next) => {
-    try {
-        if (!req.file) {
-            return res.json({ message: "No file uploaded" });
-        }
-        const result = await cloudinary.uploader.upload(req.file.path, {
-            folder: "TodoApp",
-        });
-        req.fileUrl = result.secure_url;
-        next();
-    } catch (error) {
-        console.error("Cloudinary upload error:", error);
-        res.status(500).json({ message: "Cloudinary upload failed", error });
+  try {
+    if (!req.file) {
+      return res.json({ message: "No file uploaded" });
     }
+
+    req.fileUrl = await uploadToCloudinary(req.file.path, {
+      folder: "ToDosApp/middleware-uploads",
+      resource_type: "auto",
+      originalName: req.file.originalname,
+    });
+    next();
+  } catch (error) {
+    console.error("File upload error:", error);
+    res.status(500).json({ message: "File upload failed", error: error.message });
+  }
 };
 
 export default CloudinaryMiddlewear;
-
 

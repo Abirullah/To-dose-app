@@ -5,19 +5,34 @@ import { config } from "dotenv";
 
 config();
 
-const AiFeature = async (req, res) => {
-  try {
-    const userId = req.params.userId;
-    const { message } = req.body;
+const AI_PROVIDER =
+  (process.env.AI_PROVIDER || "local").trim().toLowerCase() || "local";
 
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
+const buildLocalReply = (message) => {
+  const cleaned = String(message || "").trim();
+  if (!cleaned) {
+    return "Please share what you need help with.";
+  }
+
+  return [
+    "Local AI mode is enabled, so this response is generated offline-friendly.",
+    "",
+    `You said: "${cleaned}"`,
+    "",
+    "Suggested next steps:",
+    "1. Define the exact task outcome in one sentence.",
+    "2. Break it into 3 small actions you can finish today.",
+    "3. Pick the first action and start now.",
+  ].join("\n");
+};
+
+const getAiReply = async (message) => {
+  if (AI_PROVIDER === "cohere") {
+    const cohereApiKey = (process.env.COHERE_API_KEY || "").trim();
+    if (!cohereApiKey) {
+      throw new Error("COHERE_API_KEY is missing while AI_PROVIDER=cohere.");
     }
 
-    if (!message || message.trim() === "") {
-      return res.status(400).json({ error: "Message is required" });
-    }
     const response = await axios.post(
       "https://api.cohere.com/v2/chat",
       {
@@ -31,11 +46,36 @@ const AiFeature = async (req, res) => {
       },
       {
         headers: {
-          Authorization: `Bearer ${process.env.COHERE_API_KEY}`,
+          Authorization: `Bearer ${cohereApiKey}`,
           "Content-Type": "application/json",
         },
       }
     );
+
+    const reply = response?.data?.message?.content?.[0]?.text;
+    if (!reply) {
+      throw new Error("Cohere returned an empty reply.");
+    }
+    return reply;
+  }
+
+  return buildLocalReply(message);
+};
+
+const AiFeature = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const { message } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    if (!message || message.trim() === "") {
+      return res.status(400).json({ error: "Message is required" });
+    }
+    const aiReply = await getAiReply(message);
 
     const UserChatHeastory = await AIChatHistory.findOne({ userId });
 
@@ -62,7 +102,7 @@ const AiFeature = async (req, res) => {
       // Push today's chat message
       lastDay.chats.push({
         UserMessageContant: message,
-        AiReplayContant: response.data.message.content[0].text,
+        AiReplayContant: aiReply,
       });
 
       await UserChatHeastory.save();
@@ -78,7 +118,7 @@ const AiFeature = async (req, res) => {
             chats: [
               {
                 UserMessageContant: message,
-                AiReplayContant: response.data.message.content[0].text,
+                AiReplayContant: aiReply,
               },
             ],
           },
@@ -87,11 +127,11 @@ const AiFeature = async (req, res) => {
     }
 
     return res.json({
-      reply: response.data.message.content[0].text,
+      reply: aiReply,
     });
 
   } catch (error) {
-    console.log("Cohere API Error:", error.response?.data || error.message);
+    console.log("AI service error:", error.response?.data || error.message);
     res.status(500).json({
       error: "AI service failed.",
       details: error.response?.data || error.message,
@@ -117,5 +157,4 @@ const GetAIChatHistory = async (req, res) => {
 
 export { AiFeature, GetAIChatHistory };
   
-
 

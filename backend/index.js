@@ -12,7 +12,6 @@ process.on("unhandledRejection", (reason) => {
 
 process.on("uncaughtException", (err) => {
   console.error("UNCAUGHT_EXCEPTION:", err);
-  // Let Railway restart the process
   process.exit(1);
 });
 

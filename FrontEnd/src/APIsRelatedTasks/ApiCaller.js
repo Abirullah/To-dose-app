@@ -1,4 +1,4 @@
-const API_BASE_URL = (import.meta.env.VITE_API_URL || "https://abirtaskmaster.up.railway.app").replace(
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:5000").replace(
   /\/+$/,
   ""
 );
@@ -82,4 +82,3 @@ export async function Delete_Task(UserId, TaskId, token) {
     return null;
   }
 }
-

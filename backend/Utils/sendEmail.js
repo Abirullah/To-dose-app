@@ -11,7 +11,7 @@ const resolveProvider = () => {
   if ((process.env.EMAIL_SERVICE || "").trim() && (process.env.APP_PASSWORD || "").trim())
     return "gmail";
 
-  return "";
+  return "console";
 };
 
 const getFromAddress = (provider) => {
@@ -32,10 +32,8 @@ const getFromAddress = (provider) => {
 
 export const assertEmailSenderConfigured = () => {
   const provider = resolveProvider();
-  if (!provider) {
-    throw new Error(
-      "Email provider not configured. Set RESEND_API_KEY + RESEND_FROM (recommended) or SMTP_* / EMAIL_SERVICE + APP_PASSWORD."
-    );
+  if (provider === "console") {
+    return;
   }
 
   if (provider === "resend") {
@@ -69,7 +67,9 @@ export const assertEmailSenderConfigured = () => {
     return;
   }
 
-  throw new Error(`Unsupported EMAIL_PROVIDER: "${provider}". Use "resend", "smtp", or "gmail".`);
+  throw new Error(
+    `Unsupported EMAIL_PROVIDER: "${provider}". Use "console", "resend", "smtp", or "gmail".`
+  );
 };
 
 const withTimeout = async (promise, timeoutMs, message) => {
@@ -159,10 +159,25 @@ const sendWithNodemailer = async ({
   return { provider, messageId: info?.messageId };
 };
 
+const sendWithConsole = async ({ to, subject, html, text }) => {
+  const recipients = Array.isArray(to) ? to.join(", ") : to;
+  console.log("\n[LOCAL EMAIL]");
+  console.log(`To: ${recipients}`);
+  console.log(`Subject: ${subject}`);
+  if (text) console.log(`Text: ${text}`);
+  if (html) console.log(`HTML: ${html}`);
+  console.log("[/LOCAL EMAIL]\n");
+  return { provider: "console", messageId: "local-console" };
+};
+
 export const sendEmail = async ({ to, subject, html, text, timeoutMs = DEFAULT_TIMEOUT_MS }) => {
   assertEmailSenderConfigured();
 
   const provider = resolveProvider();
+  if (provider === "console") {
+    return sendWithConsole({ to, subject, html, text });
+  }
+
   if (provider === "resend") {
     return sendWithResend({ to, subject, html, text, timeoutMs });
   }
@@ -220,5 +235,7 @@ export const sendEmail = async ({ to, subject, html, text, timeoutMs = DEFAULT_T
     });
   }
 
-  throw new Error(`Unsupported EMAIL_PROVIDER: "${provider}".`);
+  throw new Error(
+    `Unsupported EMAIL_PROVIDER: "${provider}". Use "console", "resend", "smtp", or "gmail".`
+  );
 };
