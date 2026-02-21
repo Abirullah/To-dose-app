@@ -32,12 +32,12 @@ app.get("/health", (req, res) => {
   });
 });
 
+const normalizeOrigin = (value = "") =>
+  String(value).trim().replace(/\/+$/, "").toLowerCase();
+
 const defaultAllowedOrigins = [
-  "https://abirafriditaskmaster.vercel.app",
   "http://localhost:5173",
-  "http://127.0.0.1:5173",
-  "http://localhost:3000",
-  "http://127.0.0.1:3000",
+
 ];
 
 const allowedOrigins = process.env.CORS_ORIGIN
@@ -46,16 +46,20 @@ const allowedOrigins = process.env.CORS_ORIGIN
       .filter(Boolean)
   : defaultAllowedOrigins;
 
-const allowAllOrigins = allowedOrigins.includes("*");
+const normalizedAllowedOrigins = allowedOrigins.map(normalizeOrigin);
+
+const allowAllOrigins = normalizedAllowedOrigins.includes("*");
 
 const corsOptions = {
   origin: (origin, callback) => {
     // allow non-browser clients (curl, server-to-server)
     if (!origin || allowAllOrigins) return callback(null, true);
+    const normalizedRequestOrigin = normalizeOrigin(origin);
     if (/^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin)) {
       return callback(null, true);
     }
-    if (allowedOrigins.includes(origin)) return callback(null, true);
+    if (normalizedAllowedOrigins.includes(normalizedRequestOrigin))
+      return callback(null, true);
     return callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
