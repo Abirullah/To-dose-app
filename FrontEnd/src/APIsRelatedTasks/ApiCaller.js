@@ -1,4 +1,4 @@
-const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:5000").replace(
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "https://to-dose-app-2ct7.vercel.app").replace(
   /\/+$/,
   ""
 );

@@ -8,8 +8,10 @@ import { requireSelf } from "../MiddleWears/RequireSelf.js";
 
 import multer from "multer";
 
+const uploadDir = process.env.VERCEL ? "/tmp/uploads" : "uploads/";
+
 const upload = multer({
-  dest: "uploads/",
+  dest: uploadDir,
   limits: { fileSize: 5 * 1024 * 1024 },
 });
 

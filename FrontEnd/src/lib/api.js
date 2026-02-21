@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: (import.meta.env.VITE_API_URL || "http://localhost:5000").replace(/\/+$/, ""),
+  baseURL: (import.meta.env.VITE_API_URL || "https://to-dose-app-2ct7.vercel.app").replace(/\/+$/, ""),
 });
 
 api.interceptors.request.use((config) => {
