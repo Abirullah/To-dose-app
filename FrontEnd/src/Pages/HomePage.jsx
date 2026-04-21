@@ -33,7 +33,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#070A18] text-white">
+    <div className="min-h-screen bg-[#070A19] text-white">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-fuchsia-500/20 blur-3xl" />
         <div className="absolute top-32 -left-48 h-[420px] w-[420px] rounded-full bg-cyan-400/20 blur-3xl" />
