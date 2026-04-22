@@ -77,7 +77,7 @@ export default function HomePage() {
             <h1 className="mt-5 text-4xl font-black leading-tight tracking-tight sm:text-5xl">
               Manage tasks with a{" "}
               <span className="bg-gradient-to-r from-cyan-300 via-fuchsia-300 to-indigo-300 bg-clip-text text-transparent">
-                clean, sexy
+                clean, attractive
               </span>{" "}
               dashboard.
             </h1>
