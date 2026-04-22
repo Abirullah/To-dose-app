@@ -2,7 +2,7 @@ import axios from "axios";
 import { clearAuthSession, getAuthToken } from "./authSession";
 
 const api = axios.create({
-  baseURL: (import.meta.env.VITE_API_URL || "https://to-dose-app-2ct7.vercel.app").replace(/\/+$/, ""),
+  baseURL: ("https://to-dose-app-2ct7.vercel.app").replace(/\/+$/, ""),
 });
 
 api.interceptors.request.use((config) => {
