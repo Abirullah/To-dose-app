@@ -10,7 +10,7 @@ function TaskDetails({ workDetails, setWorkDetails }) {
     const HandleDropDownOperation = () => {
         if (workDetails.worksStatus === "completed") {
             return (
-                <div className="absolute right-10 bottom-65 w-48 bg-white rounded shadow-lg">
+                <div className="absolute right-9 bottom-65 w-50 bg-white rounded shadow-lg">
                     <DropDown
                         Delete="Delete Task"
                         workDetails={workDetails}
